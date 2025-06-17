@@ -2,7 +2,7 @@
  * Clash Verge 扩展脚本
  *
  * @description 根据提供的自定义规则，转换为 Clash Verge 支持的扩展脚本格式。
- * @author fast
+ * @author cnm-microsoft
  * @version 2025-06-16
  */
 function main(config) {
