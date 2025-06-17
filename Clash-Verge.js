@@ -2,7 +2,7 @@
  * Clash Verge 扩展脚本
  *
  * @description 根据提供的自定义规则，转换为 Clash Verge 支持的扩展脚本格式。
- * @author Gemini
+ * @author fast
  * @version 2025-06-16
  */
 function main(config) {
@@ -135,16 +135,17 @@ function main(config) {
     'DOMAIN-SUFFIX,nzh-nas.top,DIRECT',
     'DOMAIN-SUFFIX,nzh-nas.me,DIRECT',
     //广告
-    'RULE-SET,reject,💩 ‍广告',
+    'RULE-SET,reject,💩 ‍广告,no-resolve',
     //直连服务
-    'RULE-SET,LoyalDirect,DIRECT',
+    'RULE-SET,LoyalDirect,DIRECT,no-resolve',
     'RULE-SET,LoyalLanCIDR,DIRECT,no-resolve',
     'RULE-SET,LoyalCnCIDR,DIRECT,no-resolve',
-    'RULE-SET,applications,DIRECT,no-resolve',
     'GEOIP,CN,DIRECT,no-resolve',
+    'RULE-SET,applications,DIRECT,no-resolve',
+
     // 代理规则
-    'RULE-SET,AI,🤖 ‍AI',
-    'RULE-SET,ProxyGFWlist,✈️ ‍起飞',
+    'RULE-SET,AI,🤖 ‍AI,no-resolve',
+    'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
     // 最终匹配规则
     'MATCH,🌐 ‍未知站点,no-resolve'
   ];
