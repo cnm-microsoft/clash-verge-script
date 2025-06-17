@@ -11,7 +11,7 @@ function main(config) {
     {
       name: '✈️ ‍起飞',
       type: 'select',
-      proxies: ['⚡ ‍低延迟', '👆🏻 ‍指定', '📜 天书'],
+      proxies: ['⚡ ‍低延迟', '🔧 ‍自建', '📜 天书'],
     },
     {
       name: '⚡ ‍低延迟',
