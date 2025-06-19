@@ -11,7 +11,7 @@ function main(config) {
     {
       name: '✈️ ‍起飞',
       type: 'select',
-      proxies: ['⚡ ‍低延迟', '🔧 ‍自建', '📜 天书'],
+      proxies: ['⚡ ‍低延迟', '🔧 ‍自建','🕹️ EDT', '📜 天书'],
     },
     {
       name: '⚡ ‍低延迟',
@@ -24,12 +24,6 @@ function main(config) {
       'exclude-filter': '天书' // <--- 使用这个！更简单、更明确、更可靠
     },
     {
-      name: '👆🏻 ‍指定',
-      type: 'select',
-      'include-all': true,
-      proxies: []
-    },
-    {
       name: '📜 天书',
       type: 'url-test',
       url: 'https://i.ytimg.com/generate_204',
@@ -37,6 +31,17 @@ function main(config) {
       tolerance: 100,
       timeout: 2000,
       filter: '天书',
+      'include-all': true,
+      proxies: []
+    },
+    {
+      name: '🕹️ EDT',
+      type: 'url-test',
+      url: 'https://i.ytimg.com/generate_204',
+      interval: 300,
+      tolerance: 100,
+      timeout: 2000,
+      filter: 'EDT',
       'include-all': true,
       proxies: []
     },
