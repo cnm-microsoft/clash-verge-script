@@ -165,7 +165,7 @@ function main(config) {
     'RULE-SET,applications,DIRECT,no-resolve',
 
     // 代理规则
-    'RULE-SET,Gemini,🤖 ‍AI,no-resolve',
+    'RULE-SET,AI,🤖 ‍AI,no-resolve',
     'RULE-SET,Google,🤖 ‍AI,no-resolve',
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
     // 最终匹配规则
