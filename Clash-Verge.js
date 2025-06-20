@@ -16,7 +16,7 @@ function main(config) {
     {
       name: '⚡ ‍低延迟',
       type: 'url-test',
-      url: 'https://i.ytimg.com/generate_204',
+      url: 'https://www.gstatic.com/generate_204',
       interval: 300,
       tolerance: 100,
       timeout: 2000,
@@ -26,7 +26,7 @@ function main(config) {
     {
       name: '📜 天书',
       type: 'url-test',
-      url: 'https://i.ytimg.com/generate_204',
+      url: 'https://www.gstatic.com/generate_204',
       interval: 300,
       tolerance: 100,
       timeout: 2000,
@@ -37,7 +37,7 @@ function main(config) {
     {
       name: '🕹️ EDT',
       type: 'url-test',
-      url: 'https://i.ytimg.com/generate_204',
+      url: 'https://www.gstatic.com/generate_204',
       interval: 300,
       tolerance: 100,
       timeout: 2000,
@@ -117,11 +117,26 @@ function main(config) {
       path: './ruleset/reject.yaml',
       interval: 86400,
     },
+    //广告
+    AD: {
+      type: 'http',
+      behavior: 'domain',
+      url: 'https://anti-ad.net/clash.yaml',
+      path: './ruleset/anti-ad.yaml',
+      interval: 86400,
+    },
     AI: {
       type: 'http',
       behavior: 'classical',
-      url: 'https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Providers/Ruleset/AI.yaml',
-      path: './ruleset/AI.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Providers/Ruleset/Gemini.yaml',
+      path: './ruleset/Gemini.yaml',
+      interval: 86400,
+    },
+    Google: {
+      type: 'http',
+      behavior: 'classical',
+      url: 'https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Providers/Ruleset/Google.yaml',
+      path: './ruleset/Google.yaml',
       interval: 86400,
     },
     //需要直连的常见软件列表
@@ -141,6 +156,7 @@ function main(config) {
     'DOMAIN-SUFFIX,nzh-nas.me,DIRECT',
     //广告
     'RULE-SET,reject,💩 ‍广告,no-resolve',
+    'RULE-SET,AD,💩 ‍广告,no-resolve',
     //直连服务
     'RULE-SET,LoyalDirect,DIRECT,no-resolve',
     'RULE-SET,LoyalLanCIDR,DIRECT,no-resolve',
@@ -149,7 +165,8 @@ function main(config) {
     'RULE-SET,applications,DIRECT,no-resolve',
 
     // 代理规则
-    'RULE-SET,AI,🤖 ‍AI,no-resolve',
+    'RULE-SET,Gemini,🤖 ‍AI,no-resolve',
+    'RULE-SET,Google,🤖 ‍AI,no-resolve',
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
     // 最终匹配规则
     'MATCH,🌐 ‍未知站点,no-resolve'
