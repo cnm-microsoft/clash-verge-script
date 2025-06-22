@@ -1,9 +1,8 @@
 /**
  * Clash Verge 扩展脚本
- *
- * @description 根据提供的自定义规则，转换为 Clash Verge 支持的扩展脚本格式。
+ * 
  * @author cnm-microsoft
- * @version 2025-06-16
+ * 
  */
 function main(config) {
   // 代理组配置
@@ -11,7 +10,7 @@ function main(config) {
     {
       name: '✈️ ‍起飞',
       type: 'select',
-      proxies: ['⚡ ‍低延迟', '🔧 ‍自建','🕹️ EDT', '📜 天书'],
+      proxies: ['⚡ ‍低延迟', '🔧 ‍自建', '🕹️ EDT', '📜 天书'],
     },
     {
       name: '⚡ ‍低延迟',
@@ -171,6 +170,67 @@ function main(config) {
     // 最终匹配规则
     'MATCH,🌐 ‍未知站点,no-resolve'
   ];
+
+  function main(config) {
+    return {
+      ...config,
+      dns: {
+        enable: true,
+        listen: ':53',
+        'enhanced-mode': 'fake-ip',
+        'fake-ip-range': '198.18.0.1/16',
+        'fake-ip-filter-mode': 'blacklist',
+        'prefer-h3': false,
+        'respect-rules': false,
+        'use-hosts': false,
+        'use-system-hosts': false,
+        ipv6: true,
+        'fake-ip-filter': [
+          '*.lan',
+          '*.local',
+          '*.arpa',
+          'time.*.com',
+          'ntp.*.com',
+          'time.*.com',  // 注意：重复项需保留
+          '+.market.xiaomi.com',
+          'localhost.ptlogin2.qq.com',
+          '*.msftncsi.com',
+          'www.msftconnecttest.com'
+        ],
+        'default-nameserver': [
+          'system',
+          '223.6.6.6',
+          '8.8.8.8',
+          '2400:3200::1',
+          '2001:4860:4860::8888'
+        ],
+        nameserver: [
+          '8.8.8.8',
+          'https://doh.pub/dns-query',
+          'https://dns.alidns.com/dns-query'
+        ],
+        'direct-nameserver-follow-policy': false,
+        'fallback-filter': {
+          geoip: true,
+          'geoip-code': 'CN',
+          ipcidr: [
+            '240.0.0.0/4',
+            '0.0.0.0/32'
+          ],
+          domain: [
+            '+.google.com',
+            '+.facebook.com',
+            '+.youtube.com'
+          ]
+        },
+        'proxy-server-nameserver': [
+          'https://doh.pub/dns-query',
+          'https://dns.alidns.com/dns-query',
+          'tls://223.5.5.5'
+        ]
+      }
+    };
+  }
 
   // 覆盖原始配置
   config['proxy-groups'] = customProxyGroups;
