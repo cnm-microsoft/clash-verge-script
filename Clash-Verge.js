@@ -120,8 +120,8 @@ function main(config) {
     AD: {
       type: 'http',
       behavior: 'domain',
-      url: 'https://anti-ad.net/clash.yaml',
-      path: './ruleset/anti-ad.yaml',
+      url: 'https://script.cx.ms/awavenue/AWAvenue-Ads-Rule-Clash.yaml',
+      path: './ruleset/AWAvenue-Ads-Rule-Clash.yaml',
       interval: 86400,
     },
     AI: {
