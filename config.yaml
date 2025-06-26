@@ -1,0 +1,257 @@
+#完整yaml
+#由订阅、代理组、规则、dns组成
+# 1. 基础运行设置 (补全部分)
+#======================================================================
+# HTTP 和 SOCKS5 混合代理端口
+mixed-port: 7890
+# Redir 代理端口（用于透明代理，路由器等环境）
+# redir-port: 7892
+# 允许来自局域网的连接
+allow-lan: true
+# 规则模式 (rule/global/direct)
+mode: rule
+# 日志等级 (info/warning/error/debug/silent)
+log-level: info
+# 外部控制的 API 地址 (用于 Dashboard)
+external-controller: '0.0.0.0:9090'
+# 外部控制的 API 密钥 (可选，建议设置)
+# secret: 'your_secret_password'
+
+#2. 订阅提供者 (Proxy Providers)
+proxy-providers:
+  # provider1 是这个提供者的名字，可以自定义
+  provider1:
+    type: http
+    # 建议使用 URL-encoded 后的链接
+    url: "https://s.040726.xyz/share/col/%E7%BB%84%E5%90%88%E8%AE%A2%E9%98%85?token=vUtHapFHX9I1t-nCNx46u"
+    interval: 86400 # 24小时更新一次
+    path: ./profiles/providers/primary.yaml
+    health-check:
+      enable: true
+      interval: 300 # 5分钟检查一次
+      url: https://www.gstatic.com/generate_204
+
+# 3. 代理策略组 (Proxy Groups)
+proxy-groups:
+  - name: '✈️ ‍起飞'
+    type: select
+    proxies:
+      - '⚡ ‍低延迟'
+      - '🔧 ‍自建'
+      - '🕹️ EDT'
+      - '👆🏻 指定'
+      - '📜 天书'
+
+  - name: '⚡ ‍低延迟'
+    type: url-test
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 300
+    tolerance: 100
+    timeout: 2000
+    # 从 provider1 这个提供者中引入所有节点
+    use:
+      - provider1
+    # 排除名字中带有'天书'的节点
+    exclude-filter: '天书'
+
+  - name: '👆🏻 指定'
+    type: select
+    use:
+      - provider1
+    filter: '专线|超速|CN2'
+    proxies: []
+
+  - name: '📜 天书'
+    type: url-test
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 300
+    tolerance: 100
+    timeout: 2000
+    use:
+      - provider1
+    filter: '天书'
+    proxies: []
+
+  - name: '🕹️ EDT'
+    type: url-test
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 300
+    tolerance: 100
+    timeout: 2000
+    use:
+      - provider1
+    filter: 'EDT'
+    proxies: []
+
+  - name: '🔧 ‍自建'
+    type: select
+    use:
+      - provider1
+    filter: '自建'
+    proxies: []
+
+  - name: '🛩️ ‍墙内'
+    type: select
+    proxies:
+      - DIRECT
+      - REJECT
+
+  - name: '💩 ‍广告'
+    type: select
+    proxies:
+      - REJECT
+
+  - name: '🤖 ‍AI'
+    type: select
+    use:
+      - provider1
+    # 请根据您机场节点的实际命名修改此处的关键词
+    filter: 'CN2'
+    proxies: []
+
+  - name: '🌐 ‍未知站点'
+    type: select
+    proxies:
+      - '✈️ ‍起飞'
+      - '🛩️ ‍墙内'
+      - '💩 ‍广告'
+
+# 4. 规则提供者 (Rule Providers)
+rule-providers:
+  ProxyGFWlist:
+    type: http
+    behavior: domain
+    url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/gfw.txt'
+    path: ./ruleset/ProxyGFWlist.yaml
+    interval: 86400
+
+  LoyalDirect:
+    type: http
+    behavior: domain
+    url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt'
+    path: './ruleset/loyalsoldier-direct.yaml'
+    interval: 86400
+
+  LoyalCnCIDR:
+    type: http
+    behavior: ipcidr
+    url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt'
+    path: './ruleset/loyalsoldier-cncidr.yaml'
+    interval: 86400
+
+  LoyalLanCIDR:
+    type: http
+    behavior: ipcidr
+    url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt'
+    path: './ruleset/loyalsoldier-lancidr.yaml'
+    interval: 86400
+
+  reject:
+    type: http
+    behavior: domain
+    url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt'
+    path: './ruleset/reject.yaml'
+    interval: 86400
+
+  AD:
+    type: http
+    behavior: domain
+    url: 'https://script.cx.ms/awavenue/AWAvenue-Ads-Rule-Clash.yaml'
+    path: './ruleset/AWAvenue-Ads-Rule-Clash.yaml'
+    interval: 86400
+
+  AI:
+    type: http
+    behavior: classical
+    url: 'https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Providers/Ruleset/Gemini.yaml'
+    path: './ruleset/Gemini.yaml'
+    interval: 86400
+
+  Google:
+    type: http
+    behavior: classical
+    url: 'https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Providers/Ruleset/Google.yaml'
+    path: './ruleset/Google.yaml'
+    interval: 86400
+
+  applications:
+    type: http
+    behavior: classical
+    url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt'
+    path: './ruleset/applications.yaml'
+    interval: 86400
+
+# 5. 路由规则 (Rules)
+rules:
+  # 自建服务直连
+  - DOMAIN-SUFFIX,040726.xyz,DIRECT
+  - DOMAIN-SUFFIX,nzh-nas.top,DIRECT
+  - DOMAIN-SUFFIX,nzh-nas.me,DIRECT
+  
+  # 广告拦截
+  - RULE-SET,reject,💩 ‍广告,no-resolve
+  - RULE-SET,AD,💩 ‍广告,no-resolve
+  
+  # 国内/直连服务
+  - RULE-SET,LoyalDirect,DIRECT,no-resolve
+  - RULE-SET,LoyalLanCIDR,DIRECT,no-resolve
+  - RULE-SET,LoyalCnCIDR,DIRECT,no-resolve
+  - GEOIP,CN,DIRECT,no-resolve
+  - RULE-SET,applications,DIRECT,no-resolve
+  
+  # 代理规则
+  - RULE-SET,AI,🤖 ‍AI,no-resolve
+  - RULE-SET,Google,🤖 ‍AI,no-resolve
+  - RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve
+  
+  # 最终匹配规则
+  - MATCH,🌐 ‍未知站点,no-resolve
+
+# 6. DNS 配置
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  # fake-ip-filter 已更名为 fake-ip-filter-mode
+  # fake-ip-filter-mode: blacklist
+  prefer-h3: false
+  respect-rules: false
+  use-hosts: false
+  use-system-hosts: false
+  ipv6: true
+  fake-ip-filter:
+    - '*.lan'
+    - '*.local'
+    - '*.arpa'
+    - 'time.*.com'
+    - 'ntp.*.com'
+    - '*.market.xiaomi.com'
+    - 'localhost.ptlogin2.qq.com'
+    - '*.msftncsi.com'
+    - 'www.msftconnecttest.com'
+  default-nameserver:
+    - 'system'
+    - '223.6.6.6'
+    - '8.8.8.8'
+    - '2400:3200::1'
+    - '2001:4860:4860::8888'
+  nameserver:
+    - '8.8.8.8'
+    - 'https://doh.pub/dns-query'
+    - 'https://dns.alidns.com/dns-query'
+  # direct-nameserver-follow-policy: false  # 此选项可能已废弃或作用不大，可省略
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - '240.0.0.0/4'
+      - '0.0.0.0/32'
+    domain:
+      - '+.google.com'
+      - '+.facebook.com'
+      - '+.youtube.com'
+  proxy-server-nameserver:
+    - 'https://doh.pub/dns-query'
+    - 'https://dns.alidns.com/dns-query'
+    - 'tls://223.5.5.5'
