@@ -207,6 +207,7 @@ rules:
   # 自定义代理规则
   - DOMAIN-SUFFIX,linux.do,✈️ ‍起飞
   - DOMAIN-SUFFIX,cloudflare.com,✈️ ‍起飞
+  - DOMAIN-SUFFIX,manus.monica.cn,🤖 ‍AI
   
   # 最终匹配规则
   - MATCH,🌐 ‍未知站点,no-resolve
