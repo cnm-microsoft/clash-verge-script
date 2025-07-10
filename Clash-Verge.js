@@ -215,6 +215,7 @@ function main(config) {
     'DOMAIN-SUFFIX,nzh-nas.top,DIRECT',
     'DOMAIN-SUFFIX,nzh-nas.me,DIRECT',
     'DOMAIN-SUFFIX,uk.nzh-cloud.me,DIRECT',
+    'DOMAIN-SUFFIX,uk.nzh-cloud.me,DIRECT',
     // 广告拦截
     'RULE-SET,reject,💩 ‍广告,no-resolve',
     'RULE-SET,AD,💩 ‍广告,no-resolve',

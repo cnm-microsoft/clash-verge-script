@@ -150,6 +150,9 @@ function main(config) {
     'DOMAIN-SUFFIX,nzh-nas.top,DIRECT',
     'DOMAIN-SUFFIX,nzh-nas.me,DIRECT',
     'DOMAIN-SUFFIX,uk.nzh-cloud.me,DIRECT',
+    //直连规则
+    'DOMAIN-SUFFIX,linux.do,DIRECT',
+    'DOMAIN-SUFFIX,api.qnaigc.com,DIRECT',
     // 广告拦截
     'RULE-SET,reject,💩 ‍广告,no-resolve',
     'RULE-SET,AD,💩 ‍广告,no-resolve',
