@@ -165,6 +165,7 @@ function main(config) {
     // 代理规则
     'RULE-SET,AI,🤖 ‍AI,no-resolve',
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
+    'DOMAIN-SUFFIX,www.lxc.wiki,✈️ ‍起飞,no-resolv',
     // 最终匹配规则：所有未匹配到的流量都走这个规则
     'MATCH,🌐 ‍未知站点,no-resolve'
   ];
