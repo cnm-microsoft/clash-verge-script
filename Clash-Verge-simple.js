@@ -171,12 +171,11 @@ function main(config) {
     'GEOIP,CN,DIRECT,no-resolve',
     'RULE-SET,applications,DIRECT,no-resolve',
     // 自用代理规则
-    'DOMAIN-SUFFIX,api.iturrit.com,起飞,no-resolv',
+    'DOMAIN-SUFFIX,api.iturrit.com,✈️ ‍起飞,no-resolv',
     'DOMAIN-SUFFIX,www.lxc.wiki,✈️ ‍起飞,no-resolv',
     // 代理规则
     'RULE-SET,AI,🤖 ‍AI,no-resolve',
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
-    'RULE-SET,Telegram,✈️ ‍起飞,no-resolve',
     // 最终匹配规则：所有未匹配到的流量都走这个规则
     'MATCH,🌐 ‍未知站点,no-resolve'
   ];
