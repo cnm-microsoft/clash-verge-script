@@ -132,14 +132,6 @@ function main(config) {
       path: './ruleset/Google.yaml',
       interval: 86400,
     },
-    // telegram 服务规则
-    Telegram: {
-      type: 'http',
-      behavior: 'classical',
-      url: 'https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Providers/Ruleset/Telegram.yaml',
-      path: './ruleset/Telegram.yaml',
-      interval: 86400,
-    },
     // 常见需要直连的应用程序
     applications: {
       type: 'http',
@@ -170,9 +162,6 @@ function main(config) {
     'RULE-SET,LoyalCnCIDR,DIRECT,no-resolve',
     'GEOIP,CN,DIRECT,no-resolve',
     'RULE-SET,applications,DIRECT,no-resolve',
-    // 自用代理规则
-    'DOMAIN-SUFFIX,api.iturrit.com,起飞,no-resolv',
-    'DOMAIN-SUFFIX,www.lxc.wiki,✈️ ‍起飞,no-resolv',
     // 代理规则
     'RULE-SET,AI,🤖 ‍AI,no-resolve',
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
