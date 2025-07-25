@@ -218,6 +218,17 @@ function main(config) {
       'https://dns.alidns.com/dns-query'
     ],
     'direct-nameserver-follow-policy': false,
+    'nameserver-policy': {
+      'geosite:cn,private,icloud,apple': [
+        'https://doh.pub/dns-query',
+        'https://dns.alidns.com/dns-query',
+        '223.5.5.5'
+      ],
+      'geosite:google,youtube,facebook,twitter,telegram,instagram,netflix,openai,anthropic': [
+        'https://1.1.1.1/dns-query',
+        'https://8.8.8.8/dns-query'
+      ]
+    },
     'fallback-filter': {
       geoip: true,
       'geoip-code': 'CN',
