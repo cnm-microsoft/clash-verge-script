@@ -199,7 +199,7 @@ rules:
   - GEOIP,CN,DIRECT,no-resolve
   - RULE-SET,applications,DIRECT,no-resolve
   
-  # 代理规则
+  # AI 代理规则
   - RULE-SET,AI,🤖 ‍AI,no-resolve
   - RULE-SET,Google,🤖 ‍AI,no-resolve
   - RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve
