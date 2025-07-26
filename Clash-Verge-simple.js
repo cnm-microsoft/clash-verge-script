@@ -173,6 +173,8 @@ function main(config) {
     // 自用代理规则
     'DOMAIN-SUFFIX,api.iturrit.com,✈️ ‍起飞',
     'DOMAIN-SUFFIX,www.lxc.wiki,✈️ ‍起飞',
+    'DOMAIN-SUFFIX,gemini.google.com,🤖 ‍AI',
+    
     // 代理规则
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
     'RULE-SET,Telegram,✈️ ‍起飞,no-resolve',
