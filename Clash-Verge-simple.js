@@ -173,8 +173,6 @@ function main(config) {
     // 自用代理规则
     'DOMAIN-SUFFIX,api.iturrit.com,✈️ ‍起飞',
     'DOMAIN-SUFFIX,www.lxc.wiki,✈️ ‍起飞',
-    'DOMAIN-SUFFIX,gemini.google.com,🤖 ‍AI',
-    
     // 代理规则
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
     'RULE-SET,Telegram,✈️ ‍起飞,no-resolve',
@@ -220,17 +218,6 @@ function main(config) {
       'https://dns.alidns.com/dns-query'
     ],
     'direct-nameserver-follow-policy': false,
-    'nameserver-policy': {
-      'geosite:cn,private,icloud,apple': [
-        'https://doh.pub/dns-query',
-        'https://dns.alidns.com/dns-query',
-        '223.5.5.5'
-      ],
-      'geosite:google,youtube,facebook,twitter,telegram,instagram,netflix,openai,anthropic': [
-        'https://1.1.1.1/dns-query',
-        'https://8.8.8.8/dns-query'
-      ]
-    },
     'fallback-filter': {
       geoip: true,
       'geoip-code': 'CN',
