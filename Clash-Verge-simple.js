@@ -31,7 +31,7 @@ function main(config) {
       'exclude-filter': 'Enzu|天书', // 排除名称中包含 "Enzu" 的节点
       proxies: []
     },
-    
+
     {
       name: '🔧 ‍自建',
       type: 'select',
@@ -51,7 +51,7 @@ function main(config) {
     },
     {
       name: '🤖 ‍AI',
-      type: 'select', 
+      type: 'select',
       filter: 'US|自建|CN2|美国',
       'include-all': true,
       'exclude-filter': 'Enzu', // 排除名称中包含 "Enzu" 的节点
@@ -152,37 +152,52 @@ function main(config) {
 
   // --- 3. 自定义路由规则 (Rules) ---
   // 规则按从上到下的顺序匹配，一旦匹配成功，后续规则不再执行。
+  // 优化后的规则顺序：局域网 -> 广告拦截 -> 特定直连 -> AI服务 -> 代理服务 -> 国内IP -> 兜底
   const customRules = [
-    // 自建服务直连
+    // 1. 局域网和私有地址优先直连
+    'RULE-SET,LoyalLanCIDR,DIRECT,no-resolve',
+
+    // 2. 广告拦截（放在前面提高效率）
+    'RULE-SET,reject,💩 ‍广告,no-resolve',
+    'RULE-SET,AD,💩 ‍广告,no-resolve',
+
+    // 3. 特定服务直连规则
     'DOMAIN-SUFFIX,040726.xyz,DIRECT',
     'DOMAIN-SUFFIX,nzh-nas.top,DIRECT',
     'DOMAIN-SUFFIX,nzh-nas.me,DIRECT',
     'DOMAIN-SUFFIX,uk.nzh-cloud.me,DIRECT',
-    //直连规则
     'DOMAIN-SUFFIX,api.qnaigc.com,DIRECT',
-    'DOMAIN-SUFFIX,bing.com,DIRECT',
-    // 广告拦截
-    'RULE-SET,reject,💩 ‍广告,no-resolve',
-    'RULE-SET,AD,💩 ‍广告,no-resolve',
-    // 国内/直连服务
-    'RULE-SET,LoyalDirect,DIRECT,no-resolve',
-    'RULE-SET,LoyalLanCIDR,DIRECT,no-resolve',
-    'RULE-SET,LoyalCnCIDR,DIRECT,no-resolve',
-    'GEOIP,CN,DIRECT,no-resolve',
+
+    // 4. 国内服务和应用程序直连
     'RULE-SET,applications,DIRECT,no-resolve',
-    // 自用代理规则
+    'RULE-SET,LoyalDirect,DIRECT,no-resolve',
+
+    // 5. AI服务专用代理（优先级高于一般代理）
+    'RULE-SET,AI,🤖 ‍AI,no-resolve',
+    'DOMAIN-SUFFIX,openai.com,🤖 ‍AI',
+    'DOMAIN-SUFFIX,anthropic.com,🤖 ‍AI',
+    'DOMAIN-SUFFIX,claude.ai,🤖 ‍AI',
+    'DOMAIN-SUFFIX,gemini.google.com,🤖 ‍AI',
+
+    // 6. 特定代理服务
     'DOMAIN-SUFFIX,api.iturrit.com,✈️ ‍起飞',
     'DOMAIN-SUFFIX,www.lxc.wiki,✈️ ‍起飞',
-    // 代理规则
+
+    // 7. 通用代理规则
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
     'RULE-SET,Telegram,✈️ ‍起飞,no-resolve',
-    'RULE-SET,AI,🤖 ‍AI,no-resolve',
-    // 最终匹配规则：所有未匹配到的流量都走这个规则
+    'RULE-SET,Google,✈️ ‍起飞,no-resolve',
+
+    // 8. 国内IP段直连（放在后面避免误判）
+    'RULE-SET,LoyalCnCIDR,DIRECT,no-resolve',
+    'GEOIP,CN,DIRECT,no-resolve',
+
+    // 9. 最终匹配规则
     'MATCH,🌐 ‍未知站点,no-resolve'
   ];
 
   // --- 4. 自定义 DNS 配置 ---
-  // 这是脚本的核心部分之一，用于防止 DNS 污染和实现更快的解析。
+  // 优化后的DNS配置：提升性能，减少兼容性问题，增强稳定性
   const customDns = {
     enable: true,
     listen: '0.0.0.0:53',
@@ -190,62 +205,83 @@ function main(config) {
     'fake-ip-range': '198.18.0.1/16',
     'fake-ip-filter-mode': 'blacklist',
     'prefer-h3': false,
-    'respect-rules': false,
-    'use-hosts': false,
+    'respect-rules': true, // 让DNS遵循路由规则
+    'use-hosts': true,
     'use-system-hosts': false,
-    ipv6: true,
+    ipv6: false, // 关闭IPv6避免兼容性问题
+
+    // 性能优化配置
+    'nameserver-timeout': 2000,
+    'fallback-timeout': 1000,
+    'pool-size': 10,
+
+    // 简化fake-ip过滤列表
     'fake-ip-filter': [
       '*.lan',
       '*.local',
-      '*.arpa',
+      '*.localhost',
       'time.*.com',
       'ntp.*.com',
-      '+.market.xiaomi.com',
-      'localhost.ptlogin2.qq.com',
       '*.msftncsi.com',
-      'www.msftconnecttest.com'
+      'www.msftconnecttest.com',
+      'localhost.ptlogin2.qq.com',
+      '+.market.xiaomi.com',
+      '*.apple.com',
+      '*.icloud.com'
     ],
+
+    // 优化默认DNS服务器
     'default-nameserver': [
-      'system',        // 优先使用系统 DNS
-      '223.6.6.6',     // AliDNS
-      '8.8.8.8',       // Google DNS
-      '2400:3200::1',  // AliDNS IPv6
-      '2001:4860:4860::8888' // Google DNS IPv6
+      '223.5.5.5',     // 阿里DNS
+      '119.29.29.29',  // 腾讯DNS
+      '8.8.8.8'        // Google DNS作为备用
     ],
+
+    // 主DNS服务器配置
     nameserver: [
-      '8.8.8.8', // 用于 Fake-IP 的上游 DNS
       'https://doh.pub/dns-query',
-      'https://dns.alidns.com/dns-query'
+      'https://dns.alidns.com/dns-query',
+      '223.5.5.5',
+      '8.8.8.8'
     ],
-    'direct-nameserver-follow-policy': false,
+
+    // 优化分流DNS策略
     'nameserver-policy': {
-      'geosite:cn,private,icloud,apple': [
+      // 国内域名使用国内DNS
+      'geosite:cn,private': [
         'https://doh.pub/dns-query',
         'https://dns.alidns.com/dns-query',
         '223.5.5.5'
       ],
-      'geosite:google,youtube,facebook,twitter,telegram,instagram,netflix,openai,anthropic': [
+      // 海外服务使用海外DNS
+      'geosite:google,youtube,facebook,twitter,telegram,netflix,openai,anthropic': [
         'https://1.1.1.1/dns-query',
         'https://8.8.8.8/dns-query'
+      ],
+      // Apple服务特殊处理
+      'geosite:apple,icloud': [
+        'https://doh.pub/dns-query',
+        '223.5.5.5'
+      ],
+      // 特定域名直接指定DNS
+      'domain:040726.xyz,nzh-nas.top,nzh-nas.me': [
+        '223.5.5.5',
+        '119.29.29.29'
       ]
     },
+
+    // 简化fallback配置
     'fallback-filter': {
       geoip: true,
       'geoip-code': 'CN',
-      ipcidr: [
-        '240.0.0.0/4',
-        '0.0.0.0/32'
-      ],
-      domain: [
-        '+.google.com',
-        '+.facebook.com',
-        '+.youtube.com'
-      ]
+      ipcidr: ['240.0.0.0/4'],
+      domain: ['+.google.com', '+.youtube.com', '+.facebook.com']
     },
+
+    // 代理服务器DNS配置
     'proxy-server-nameserver': [
       'https://doh.pub/dns-query',
-      'https://dns.alidns.com/dns-query',
-      'tls://223.5.5.5'
+      'https://dns.alidns.com/dns-query'
     ]
   };
 
