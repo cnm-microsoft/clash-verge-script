@@ -246,6 +246,12 @@ function main(config) {
     'rule-providers': customRuleProviders,
     rules: customRules,
     dns: customDns,
+    // 基础运行设置
+    'mixed-port': 7890,
+    'allow-lan': true,
+    'mode': 'rule',
+    'log-level': 'info',
+    'external-controller': '0.0.0.0:9090'
   });
 
   // 返回修改后的完整配置对象
