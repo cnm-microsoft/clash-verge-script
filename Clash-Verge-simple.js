@@ -148,6 +148,14 @@ function main(config) {
       path: './ruleset/applications.yaml',
       interval: 86400,
     },
+    // 7. 特定直连规则
+    geoip_cloudfront: {
+  type: 'http',
+  behavior: 'classical',
+  url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/cloudfront.mrs',
+  path: './ruleset/geoip_cloudfront.yaml',
+  interval: 86400,
+    },
   };
 
   // --- 3. 自定义路由规则 (Rules) ---
