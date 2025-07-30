@@ -156,29 +156,8 @@ function main(config) {
   path: './ruleset/geoip_cloudfront.yaml',
   interval: 86400,
     },
-    cn_domain: {
-      type: 'http',
-      behavior: 'domain',
-      url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt',
-      path: './ruleset/cn_domain.yaml',
-      interval: 86400,
-    },
-    // 用于 Fake-IP 过滤的私有域名列表 (通常包含局域网和特殊地址)
-    private_domain: {
-      type: 'http',
-      behavior: 'domain',
-      url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt',
-      path: './ruleset/private_domain.yaml',
-      interval: 86400,
-    },
-    // DustinWin 的 Fake-IP 过滤补充规则
-    fake_ip_filter_DustinWin: {
-      type: 'http',
-      behavior: 'domain',
-      url: 'https://raw.githubusercontent.com/DustinWin/clash_rules/main/rules/fake_ip_filter.txt',
-      path: './ruleset/fake_ip_filter_DustinWin.yaml',
-      interval: 86400,
-    },
+
+
   };
 
   // --- 3. 自定义路由规则 (Rules) ---
@@ -236,9 +215,7 @@ function main(config) {
     ipv6: true,
     listen: '0.0.0.0:1053', // 监听地址和端口
     'prefer-h3': false,     // 如果DNS服务器支持DoH3会优先使用h3，提升性能
-    'respect-rules': true,  // 让 DNS 解析遵循 Clash 的路由规则
-    'cache-algorithm': 'arc', // 使用性能更优的 ARC 缓存算法
-    'cache-size': 2048,     // 限制缓存大小，避免占用过多内存
+    'respect-rules': false,  // 让 DNS 解析遵循 Clash 的路由规则（设为false避免循环依赖）
 
     'use-hosts': false,        // 使用hosts
     'use-system-hosts': false, // 使用系统hosts
@@ -247,12 +224,21 @@ function main(config) {
     'enhanced-mode': 'fake-ip',       // 设置增强模式为 fake-ip 模式，提高解析速度和连接性能
     'fake-ip-range': '198.18.0.1/16', // fake-ip 地址范围
     // Fake-IP 过滤器：确保国内域名不被 Fake-IP 转换。
-    'fake-ip-filter-mode': 'blacklist',
     'fake-ip-filter': [
-      'rule-set:private_domain,cn_domain',
-      'geosite:connectivity-check',
-      'geosite:private',
-      'rule-set:fake_ip_filter_DustinWin'
+      '*.lan',
+      '*.local',
+      '*.arpa',
+      'time.*.com',
+      'ntp.*.com',
+      '*.market.xiaomi.com',
+      'localhost.ptlogin2.qq.com',
+      '*.msftncsi.com',
+      'www.msftconnecttest.com',
+      '*.apple.com',
+      '*.icloud.com',
+      '*.mzstatic.com',
+      '*.crashlytics.com',
+      '*.googleapis.com'
     ],
 
     'default-nameserver': [
@@ -278,31 +264,19 @@ function main(config) {
     ],
 
     'nameserver-policy': {
-      'geosite:cn,private': [ // 国内域名和私有域名强制走国内 DNS
+      '+.cn': [ // 国内域名强制走国内 DNS
         'https://223.5.5.5/dns-query',  // 阿里
         'https://doh.pub/dns-query',    // 腾讯
         '223.5.5.5',                   // 阿里 UDP
         '119.29.29.29'                // 腾讯 UDP
       ],
-      'geo:cn': [                       // 也可以用 geo:cn 匹配 IP
-        'https://223.5.5.5/dns-query',
-        'https://doh.pub/dns-query',
-        '223.5.5.5',                   // 阿里 UDP
-        '119.29.29.29'                // 腾讯 UDP
-      ],
-      'geosite:gfw': [                  // 新增：GFW 列表域名强制走国外 DNS
+      '+.google.com': [                 // Google 域名走国外 DNS
         'https://1.1.1.1/dns-query',
         'https://dns.google/dns-query',
         '1.1.1.1',
         '8.8.8.8'
       ],
-      'geosite:geolocation-!cn': [      // 新增：非中国大陆域名强制走国外 DNS
-        'https://1.1.1.1/dns-query',
-        'https://dns.google/dns-query',
-        '1.1.1.1',
-        '8.8.8.8'
-      ],
-      'full-nameserver': [              // 新增：最终兜底，所有未匹配的域名查询强制走国外 DNS
+      '+.openai.com': [                 // OpenAI 域名走国外 DNS
         'https://1.1.1.1/dns-query',
         'https://dns.google/dns-query',
         '1.1.1.1',
@@ -310,12 +284,26 @@ function main(config) {
       ]
     },
 
-    // 当 \`nameserver\` 中的 DNS 服务器解析失败时，Clash 会尝试这里的 DNS。
+    // 当 nameserver 中的 DNS 服务器解析失败时，Clash 会尝试这里的 DNS。
     fallback: [
       '1.1.1.1', // Cloudflare DNS备用
       '8.8.8.8'  // Google DNS备用
-      // '9.9.9.9'                    // Quad9 (备选，更注重隐私和安全性)
     ],
+    
+    // fallback 过滤器配置
+    'fallback-filter': {
+      geoip: true,
+      'geoip-code': 'CN',
+      ipcidr: [
+        '240.0.0.0/4',
+        '0.0.0.0/32'
+      ],
+      domain: [
+        '+.google.com',
+        '+.facebook.com',
+        '+.youtube.com'
+      ]
+    },
 
     // \`proxy-server-nameserver\`: 用于代理服务器自身的 DNS 解析，仅包含国外 DNS。
     'proxy-server-nameserver': [          // 当请求通过代理（即国外站）时使用
