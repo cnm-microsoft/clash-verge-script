@@ -185,6 +185,7 @@ function main(config) {
     'DOMAIN-SUFFIX,www.lxc.wiki,✈️ ‍起飞',
 
     // 7. 通用代理规则
+    'PROCESS-NAME-REGEX,.*telegram.*,✈️ ‍起飞',
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
     'RULE-SET,Telegram,✈️ ‍起飞,no-resolve',
     'RULE-SET,Google,✈️ ‍起飞,no-resolve',

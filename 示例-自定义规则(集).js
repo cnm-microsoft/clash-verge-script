@@ -146,6 +146,8 @@ const domesticNameservers = [
     "DOMAIN,v2rayse.com,节点选择", // V2rayse节点工具
     // blackmatrix7 规则集
     "RULE-SET,openai,ChatGPT",
+    // 进程名称规则
+    "PROCESS-NAME-REGEX,.*telegram.*,电报消息",
     // Loyalsoldier 规则集
     "RULE-SET,applications,全局直连",
     "RULE-SET,private,全局直连",

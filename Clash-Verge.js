@@ -226,7 +226,9 @@ function main(config) {
     'GEOIP,CN,DIRECT,no-resolve',
     'RULE-SET,applications,DIRECT,no-resolve',
     // 代理规则
+    'PROCESS-NAME-REGEX,.*telegram.*,✈️ ‍起飞',
     'RULE-SET,AI,🤖 ‍AI,no-resolve',
+    'RULE-SET,Google,🤖 ‍AI,no-resolve',
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
     // 最终匹配规则：所有未匹配到的流量都走这个规则
     'MATCH,🌐 ‍未知站点,no-resolve'
