@@ -156,6 +156,29 @@ function main(config) {
   path: './ruleset/geoip_cloudfront.yaml',
   interval: 86400,
     },
+    cn_domain: {
+      type: 'http',
+      behavior: 'domain',
+      url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt',
+      path: './ruleset/cn_domain.yaml',
+      interval: 86400,
+    },
+    // 用于 Fake-IP 过滤的私有域名列表 (通常包含局域网和特殊地址)
+    private_domain: {
+      type: 'http',
+      behavior: 'domain',
+      url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt',
+      path: './ruleset/private_domain.yaml',
+      interval: 86400,
+    },
+    // DustinWin 的 Fake-IP 过滤补充规则
+    fake_ip_filter_DustinWin: {
+      type: 'http',
+      behavior: 'domain',
+      url: 'https://raw.githubusercontent.com/DustinWin/clash_rules/main/rules/fake_ip_filter.txt',
+      path: './ruleset/fake_ip_filter_DustinWin.yaml',
+      interval: 86400,
+    },
   };
 
   // --- 3. 自定义路由规则 (Rules) ---
