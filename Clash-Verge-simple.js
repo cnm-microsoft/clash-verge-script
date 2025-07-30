@@ -1,6 +1,6 @@
 /**
  * Clash Verge 扩展脚本
- * @author cnm-microsoft (由 Gemini 审查和修复)
+ * @author cnm-microsoft
  * @description
  */
 function main(config) {
@@ -167,17 +167,18 @@ function main(config) {
     'DOMAIN-SUFFIX,nzh-nas.me,DIRECT',
     'DOMAIN-SUFFIX,uk.nzh-cloud.me,DIRECT',
     'DOMAIN-SUFFIX,api.qnaigc.com,DIRECT',
+    'RULE-SET,geoip_cloudfront,DIRECT,no-resolve',
 
     // 4. 国内服务和应用程序直连
     'RULE-SET,applications,DIRECT,no-resolve',
     'RULE-SET,LoyalDirect,DIRECT,no-resolve',
 
     // 5. AI服务专用代理（优先级高于一般代理）
-    'RULE-SET,AI,🤖 ‍AI,no-resolve',
     'DOMAIN-SUFFIX,openai.com,🤖 ‍AI',
     'DOMAIN-SUFFIX,anthropic.com,🤖 ‍AI',
     'DOMAIN-SUFFIX,claude.ai,🤖 ‍AI',
     'DOMAIN-SUFFIX,gemini.google.com,🤖 ‍AI',
+    'RULE-SET,AI,🤖 ‍AI,no-resolve',
 
     // 6. 特定代理服务
     'DOMAIN-SUFFIX,api.iturrit.com,✈️ ‍起飞',
@@ -199,91 +200,97 @@ function main(config) {
   // --- 4. 自定义 DNS 配置 ---
   // 优化后的DNS配置：提升性能，减少兼容性问题，增强稳定性
   const customDns = {
-    enable: true,
-    listen: '0.0.0.0:53',
-    'enhanced-mode': 'fake-ip',
-    'fake-ip-range': '198.18.0.1/16',
+    enable: true, // 启用 DNS 功能
+    ipv6: true,
+    listen: '0.0.0.0:1053', // 监听地址和端口
+    'prefer-h3': false,     // 如果DNS服务器支持DoH3会优先使用h3，提升性能
+    'respect-rules': true,  // 让 DNS 解析遵循 Clash 的路由规则
+    'cache-algorithm': 'arc', // 使用性能更优的 ARC 缓存算法
+    'cache-size': 2048,     // 限制缓存大小，避免占用过多内存
+
+    'use-hosts': false,        // 使用hosts
+    'use-system-hosts': false, // 使用系统hosts
+
+    // 启用 Fake-IP 模式，这是强制劫持所有 DNS 请求的关键。
+    'enhanced-mode': 'fake-ip',       // 设置增强模式为 fake-ip 模式，提高解析速度和连接性能
+    'fake-ip-range': '198.18.0.1/16', // fake-ip 地址范围
+    // Fake-IP 过滤器：确保国内域名不被 Fake-IP 转换。
     'fake-ip-filter-mode': 'blacklist',
-    'prefer-h3': false,
-    'respect-rules': true, // 让DNS遵循路由规则
-    'use-hosts': true,
-    'use-system-hosts': false,
-    ipv6: false, // 关闭IPv6避免兼容性问题
-
-    // 性能优化配置
-    'nameserver-timeout': 2000,
-    'fallback-timeout': 1000,
-    'pool-size': 10,
-
-    // 简化fake-ip过滤列表
     'fake-ip-filter': [
-      '*.lan',
-      '*.local',
-      '*.localhost',
-      'time.*.com',
-      'ntp.*.com',
-      '*.msftncsi.com',
-      'www.msftconnecttest.com',
-      'localhost.ptlogin2.qq.com',
-      '+.market.xiaomi.com',
-      '*.apple.com',
-      '*.icloud.com'
+      'rule-set:private_domain,cn_domain',
+      'geosite:connectivity-check',
+      'geosite:private',
+      'rule-set:fake_ip_filter_DustinWin'
     ],
 
-    // 优化默认DNS服务器
     'default-nameserver': [
-      '223.5.5.5',     // 阿里DNS
-      '119.29.29.29',  // 腾讯DNS
-      '8.8.8.8'        // Google DNS作为备用
+      '1.1.1.1',                    // Cloudflare Public DNS (UDP)
+      '8.8.8.8'                     // Google Public DNS (UDP)
+      // 为配合rules中的IP-CIDR注释掉，防止dns泄露（启用就泄露）
+      // '223.5.5.5',                 // 阿里（国内）
+      // '119.29.29.29',              // 腾讯（国内）
+      // 'system' // 系统 DNS (保留以防万一)
     ],
 
-    // 主DNS服务器配置
-    nameserver: [
-      'https://doh.pub/dns-query',
-      'https://dns.alidns.com/dns-query',
-      '223.5.5.5',
-      '8.8.8.8'
+    // \`nameserver-policy\` 精准分流与严格兜底。**
+    // 确保国内域名走国内 DNS，境外域名走境外 DNS。这是解决问题的关键。
+    // 这是 Clash 进行主要 DNS 查询时使用的服务器列表。
+    nameserver: [ // 默认 DNS，供所有请求使用，支持 DoH3 的在前面
+      'https://1.1.1.1/dns-query',     // Cloudflare（支持 H3）
+      'https://dns.google/dns-query',  // Google（支持 H3）
+      '1.1.1.1',                      // Cloudflare Public DNS (UDP)
+      '8.8.8.8'                       // Google Public DNS (UDP)
+      // 为配合rules中的IP-CIDR注释掉，防止dns泄露（启用就泄露）
+      // 'https://dns.alidns.com/dns-query',  // 阿里（国内稳定）
+      // 'https://doh.pub/dns-query'  // 腾讯 (境内，DoH，可作为备选)
     ],
 
-    'direct-nameserver-follow-policy': false,
-    
-    // 优化分流DNS策略
     'nameserver-policy': {
-      // 国内域名使用国内DNS
-      'geosite:cn,private': [
-        'https://doh.pub/dns-query',
-        'https://dns.alidns.com/dns-query',
-        '223.5.5.5'
+      'geosite:cn,private': [ // 国内域名和私有域名强制走国内 DNS
+        'https://223.5.5.5/dns-query',  // 阿里
+        'https://doh.pub/dns-query',    // 腾讯
+        '223.5.5.5',                   // 阿里 UDP
+        '119.29.29.29'                // 腾讯 UDP
       ],
-      // 海外服务使用海外DNS
-      'geosite:google,youtube,facebook,twitter,telegram,netflix,openai,anthropic': [
+      'geo:cn': [                       // 也可以用 geo:cn 匹配 IP
+        'https://223.5.5.5/dns-query',
+        'https://doh.pub/dns-query',
+        '223.5.5.5',                   // 阿里 UDP
+        '119.29.29.29'                // 腾讯 UDP
+      ],
+      'geosite:gfw': [                  // 新增：GFW 列表域名强制走国外 DNS
         'https://1.1.1.1/dns-query',
-        'https://8.8.8.8/dns-query'
+        'https://dns.google/dns-query',
+        '1.1.1.1',
+        '8.8.8.8'
       ],
-      // Apple服务特殊处理
-      'geosite:apple,icloud': [
-        'https://doh.pub/dns-query',
-        '223.5.5.5'
+      'geosite:geolocation-!cn': [      // 新增：非中国大陆域名强制走国外 DNS
+        'https://1.1.1.1/dns-query',
+        'https://dns.google/dns-query',
+        '1.1.1.1',
+        '8.8.8.8'
       ],
-      // 特定域名直接指定DNS
-      'domain:040726.xyz,nzh-nas.top,nzh-nas.me': [
-        '223.5.5.5',
-        '119.29.29.29'
+      'full-nameserver': [              // 新增：最终兜底，所有未匹配的域名查询强制走国外 DNS
+        'https://1.1.1.1/dns-query',
+        'https://dns.google/dns-query',
+        '1.1.1.1',
+        '8.8.8.8'
       ]
     },
 
-    // 简化fallback配置
-    'fallback-filter': {
-      geoip: true,
-      'geoip-code': 'CN',
-      ipcidr: ['240.0.0.0/4'],
-      domain: ['+.google.com', '+.youtube.com', '+.facebook.com']
-    },
+    // 当 \`nameserver\` 中的 DNS 服务器解析失败时，Clash 会尝试这里的 DNS。
+    fallback: [
+      '1.1.1.1', // Cloudflare DNS备用
+      '8.8.8.8'  // Google DNS备用
+      // '9.9.9.9'                    // Quad9 (备选，更注重隐私和安全性)
+    ],
 
-    // 代理服务器DNS配置
-    'proxy-server-nameserver': [
-      'https://doh.pub/dns-query',
-      'https://dns.alidns.com/dns-query'
+    // \`proxy-server-nameserver\`: 用于代理服务器自身的 DNS 解析，仅包含国外 DNS。
+    'proxy-server-nameserver': [          // 当请求通过代理（即国外站）时使用
+      'https://1.1.1.1/dns-query',      // Cloudflare，DoH3
+      'https://dns.google/dns-query',   // Google，DoH3
+      '1.1.1.1',
+      '8.8.8.8'
     ]
   };
 
@@ -299,8 +306,18 @@ function main(config) {
     'mixed-port': 7890,
     'allow-lan': true,
     'mode': 'rule',
-    'log-level': 'info',
-    'external-controller': '0.0.0.0:9090'
+    'log-level': 'warning',  // 日志级别设置为warning，减少日志输出
+    'external-controller': '0.0.0.0:9090',
+    // 性能优化设置
+    'unified-delay': true,  // 更换延迟计算方式，去除握手等额外延迟
+    'tcp-concurrent': true,  // 启用 TCP 并发连接，提高网络性能和连接速度
+    // 进程和指纹设置
+    'find-process-mode': 'strict',  // 设置进程查找模式为严格模式，更精确地识别和匹配网络流量来源的进程
+    'global-client-fingerprint': 'chrome',  // 设置全局客户端指纹为 Chrome，增强隐私性和绕过某些网站的指纹检测
+    // 连接保持设置
+    'keep-alive-idle': 600,  // 设置保持连接的空闲时间（秒）
+    'keep-alive-interval': 15,  // 设置保持连接的间隔时间（秒）
+    'disable-keep-alive': false  // 启用保持连接功能
   });
 
   // 返回修改后的完整配置对象
