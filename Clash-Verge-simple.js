@@ -195,10 +195,10 @@ function main(config) {
     'DOMAIN-SUFFIX,www.lxc.wiki,✈️ ‍起飞',
 
     // 7. 通用代理规则
+    'RULE-SET,Google,✈️ ‍起飞,no-resolve',
+    'RULE-SET,Telegram,✈️ ‍起飞,no-resolve',
     'PROCESS-NAME-REGEX,.*telegram.*,✈️ ‍起飞',
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
-    'RULE-SET,Telegram,✈️ ‍起飞,no-resolve',
-    'RULE-SET,Google,✈️ ‍起飞,no-resolve',
 
     // 8. 国内IP段直连（放在后面避免误判）
     'RULE-SET,LoyalCnCIDR,DIRECT,no-resolve',
