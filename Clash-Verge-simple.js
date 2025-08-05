@@ -196,37 +196,37 @@ function main(config) {
     ipv6: true,
     'fake-ip-filter': [
       '*.lan',
-      '*.local'，
+      '*.local',
       '*.arpa',
       'time.*.com',
-      'ntp.*.com'，
+      'ntp.*.com',
       '+.market.xiaomi.com',
-      'localhost.ptlogin2.qq.com'，
-      '*.msftncsi.com'，
+      'localhost.ptlogin2.qq.com',
+      '*.msftncsi.com',
       'www.msftconnecttest.com'
-    ]，
+    ],
     'default-nameserver': [
       'system',        // 优先使用系统 DNS
-      '223.6.6.6'，     // AliDNS
-      '8.8.8.8'，       // Google DNS
-      '2400:3200::1'，  // AliDNS IPv6
+      '223.6.6.6',     // AliDNS
+      '8.8.8.8',       // Google DNS
+      '2400:3200::1',  // AliDNS IPv6
       '2001:4860:4860::8888' // Google DNS IPv6
-    ]，
+    ],
     nameserver: [
-      '8.8.8.8'， // 用于 Fake-IP 的上游 DNS
-      'https://doh.pub/dns-query'，
+      '8.8.8.8', // 用于 Fake-IP 的上游 DNS
+      'https://doh.pub/dns-query',
       'https://dns.alidns.com/dns-query'
     ],
     'direct-nameserver-follow-policy': false,
     'fallback-filter': {
-      geoip: true，
+      geoip: true,
       'geoip-code': 'CN',
       ipcidr: [
-        '240.0.0.0/4'，
+        '240.0.0.0/4',
         '0.0.0.0/32'
       ],
       domain: [
-        '+.google.com'，
+        '+.google.com',
         '+.facebook.com',
         '+.youtube.com'
       ]

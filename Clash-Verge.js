@@ -1,306 +1,507 @@
-/**
- * Clash Verge 扩展脚本
- * @author cnm-microsoft (由 Gemini 审查和修复)
- * @description
- */
+
+// Clash Verge 覆写脚本 - 整合 Clash-Verge-simple.js 代理组配置
+// 该脚本将原始YAML配置转换为JavaScript格式，便于动态配置和自定义
+
 function main(config) {
-  // --- 1. 自定义代理组 (Proxy Groups) ---
-  // 这里定义了用户在 Clash Verge UI 中看到的各种策略组。
-  const customProxyGroups = [
-    {
-      name: '✈️ ‍起飞',
-      type: 'select',
-      // 在最前面加入链式代理选项，方便切换
-      proxies: ['🔗 链式中转', '⚡ ‍低延迟', '🔧 ‍自建','📜 天书', '🕹️ EDT', '☁ UK-CDN', '👆🏻 指定'],
-    },
-    {
-      name: '⚡ ‍低延迟',
-      type: 'url-test',
-      url: 'https://www.gstatic.com/generate_204',
-      interval: 300,
-      tolerance: 100,
-      timeout: 2000,
-      'include-all': true, // 包括订阅中的所有节点
-      'exclude-filter': 'EDT|Enzu|天书' // 排除名称中包含 "Enzu" 的节点
-    },
-    {
-      name: '👆🏻 指定',
-      type: 'select',
-      filter: '专线|超速|CN2', // 筛选名称包含这些关键字的节点
-      'include-all': true,
-      'exclude-filter': 'Enzu|天书', // 排除名称中包含 "Enzu" 的节点
-      proxies: []
-    },
-    {
-      name: '🕹️ EDT',
-      type: 'url-test',
-      url: 'https://www.gstatic.com/generate_204',
-      interval: 300,
-      tolerance: 100,
-      timeout: 2000,
-      filter: 'EDT', // 仅筛选名称包含 "EDT" 的节点
-      'include-all': true,
-      proxies: []
-    },
-    {
-      name: '📜 天书',
-      type: 'url-test',
-      url: 'https://www.gstatic.com/generate_204',
-      interval: 300,
-      tolerance: 100,
-      timeout: 2000,
-      filter: '天书',
-      'include-all': true,
-      proxies: []
-    },
-    {
-      name: '☁ UK-CDN',
-      type: 'url-test',
-      url: 'https://www.gstatic.com/generate_204',
-      interval: 300,
-      tolerance: 100,
-      timeout: 2000,
-      filter: 'UK-CDN', // 仅筛选名称包含 "UK-CDN" 的节点
-      'include-all': true,
-      proxies: []
-    },
-    {
-      name: '🔧 ‍自建',
-      type: 'select',
-      filter: '自建', // 筛选名称包含 '自建' 字符的节点
-      'include-all': true,
-      proxies: []
-    },
-    // --- 链式代理核心配置 ---
-    {
-      name: '🔗 链式中转',
-      type: 'relay', // 'relay' 类型用于创建代理链
-      // 流量路径: 本地 -> 中转节点 -> 落地-SOCKS5 -> 目标服务器
-      // 第一个组是入口/中转，第二个组是出口/落地
-      proxies: ['🇹🇷 中转节点', '🇱🇺 落地-SOCKS5'],
-    },
-    {
-      name: '🇹🇷 中转节点', // 代理链的入口节点
-      type: 'url-test',
-      url: 'https://www.gstatic.com/generate_204',
-      interval: 300,
-      tolerance: 100,
-      timeout: 2000,
-      'include-all': true,
-      filter: '自建',
-      'exclude-filter': 'Enzu',
-    },
-    {
-      name: '🇱🇺 落地-SOCKS5', // 代理链的出口节点
-      type: 'url-test',
-      url: 'https://www.gstatic.com/generate_204',
-      interval: 300,
-      tolerance: 100,
-      timeout: 2000,
-      'include-all': true,
-      filter: 'Enzu',
-    },
-    // --- 功能性策略组 ---
-    {
-      name: '🛩️ ‍墙内',
-      type: 'select',
-      proxies: ['DIRECT', 'REJECT'], // 国内流量，优先直连
-    },
-    {
-      name: '💩 ‍广告',
-      type: 'select',
-      proxies: ['REJECT', 'DIRECT'], // 广告流量，优先拦截
-    },
-    {
-      name: '🤖 ‍AI',
-      type: 'select', // [修复] 此处之前缺少一个逗号
-      // [优化] 'x' 是一个无效的过滤器。建议修改为您解锁 AI 服务效果最好的节点区域关键字。
-      // 例如: 'US|JP|新加坡|美国'，Clash 会自动筛选出节点名包含这些关键字的节点。
-      // 如果留空，则会包含所有节点。
-      filter: 'US|拼好鸡|CN2|美国',
-      'include-all': true,
-      'exclude-filter': 'Enzu', // 排除名称中包含 "Enzu" 的节点
-      proxies: [],
-    },
-    {
-      name: '🌐 ‍未知站点',
-      type: 'select',
-      // 未匹配任何规则的流量的最终走向
-      proxies: ['✈️ ‍起飞', '🛩️ ‍墙内'],
-    },
-  ];
+    // **=============================== 代理配置 ===============================**
 
-  // --- 2. 自定义规则集提供者 (Rule Providers) ---
-  // 这里定义了从网络上获取的规则列表。
-  const customRuleProviders = {
-    // GFW 列表
-    ProxyGFWlist: {
-      type: 'http',
-      behavior: 'domain',
-      url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/gfw.txt',
-      path: './ruleset/ProxyGFWlist.yaml',
-      interval: 86400, // 每天更新一次
-    },
-    // 直连域名列表
-    LoyalDirect: {
-      type: 'http',
-      behavior: 'domain',
-      url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt',
-      path: './ruleset/loyalsoldier-direct.yaml',
-      interval: 86400,
-    },
-    // 国内 IP 段
-    LoyalCnCIDR: {
-      type: 'http',
-      behavior: 'ipcidr',
-      url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt',
-      path: './ruleset/loyalsoldier-cncidr.yaml',
-      interval: 86400,
-    },
-    // 局域网 IP 段
-    LoyalLanCIDR: {
-      type: 'http',
-      behavior: 'ipcidr',
-      url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt',
-      path: './ruleset/loyalsoldier-lancidr.yaml',
-      interval: 86400,
-    },
-    // 广告域名列表
-    reject: {
-      type: 'http',
-      behavior: 'domain',
-      url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt',
-      path: './ruleset/reject.yaml',
-      interval: 86400,
-    },
-    // 另一个广告规则作为补充
-    AD: {
-      type: 'http',
-      behavior: 'domain',
-      url: 'https://script.cx.ms/awavenue/AWAvenue-Ads-Rule-Clash.yaml',
-      path: './ruleset/AWAvenue-Ads-Rule-Clash.yaml',
-      interval: 86400,
-    },
-    // AI 服务规则 (例如 Gemini, OpenAI)
-    AI: {
-      type: 'http',
-      behavior: 'classical',
-      url: 'https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Providers/Ruleset/Gemini.yaml',
-      path: './ruleset/Gemini.yaml',
-      interval: 86400,
-    },
-    // Google 服务规则
-    Google: {
-      type: 'http',
-      behavior: 'classical',
-      url: 'https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Providers/Ruleset/Google.yaml',
-      path: './ruleset/Google.yaml',
-      interval: 86400,
-    },
-    // 常见需要直连的应用程序
-    applications: {
-      type: 'http',
-      behavior: 'classical',
-      url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt',
-      path: './ruleset/applications.yaml',
-      interval: 86400,
-    },
-  };
+    // 代理提供者通用配置模板
+    const proxyProviderTemplate = {
+        type: "http",
+        udp: true,
+        interval: 86400,
+        lazy: true,
+        "health-check": {
+            enable: true,
+            url: "https://cp.cloudflare.com/generate_204",
+            interval: 600,
+            timeout: 5,
+            lazy: true,
+            "expected-status": "204",
+            method: "HEAD"
+        },
+        smux: {
+            enabled: true,
+            padding: true,
+            protocol: "smux"
+        }
+    };
 
-  // --- 3. 自定义路由规则 (Rules) ---
-  // 规则按从上到下的顺序匹配，一旦匹配成功，后续规则不再执行。
-  const customRules = [
-    // 自建服务直连
-    'DOMAIN-SUFFIX,040726.xyz,DIRECT',
-    'DOMAIN-SUFFIX,nzh-nas.top,DIRECT',
-    'DOMAIN-SUFFIX,nzh-nas.me,DIRECT',
-    'DOMAIN-SUFFIX,uk.nzh-cloud.me,DIRECT',
-    'DOMAIN-SUFFIX,uk.nzh-cloud.me,DIRECT',
-    // 广告拦截
-    'RULE-SET,reject,💩 ‍广告,no-resolve',
-    'RULE-SET,AD,💩 ‍广告,no-resolve',
-    // 国内/直连服务
-    'RULE-SET,LoyalDirect,DIRECT,no-resolve',
-    'RULE-SET,LoyalLanCIDR,DIRECT,no-resolve',
-    'RULE-SET,LoyalCnCIDR,DIRECT,no-resolve',
-    'GEOIP,CN,DIRECT,no-resolve',
-    'RULE-SET,applications,DIRECT,no-resolve',
-    // 代理规则
-    'PROCESS-NAME-REGEX,.*telegram.*,✈️ ‍起飞',
-    'RULE-SET,AI,🤖 ‍AI,no-resolve',
-    'RULE-SET,Google,🤖 ‍AI,no-resolve',
-    'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
-    // 最终匹配规则：所有未匹配到的流量都走这个规则
-    'MATCH,🌐 ‍未知站点,no-resolve'
-  ];
+    // **=============================== 节点信息 ===============================**
+    config.proxies = [
+        { name: "DIRECTLY", type: "direct", udp: true },
+        { name: "REJECT", type: "reject" }
+    ];
 
-  // --- 4. 自定义 DNS 配置 ---
-  // 这是脚本的核心部分之一，用于防止 DNS 污染和实现更快的解析。
-  const customDns = {
-    enable: true,
-    listen: '0.0.0.0:53',
-    'enhanced-mode': 'fake-ip',
-    'fake-ip-range': '198.18.0.1/16',
-    'fake-ip-filter-mode': 'blacklist',
-    'prefer-h3': false,
-    'respect-rules': false,
-    'use-hosts': false,
-    'use-system-hosts': false,
-    ipv6: true,
-    'fake-ip-filter': [
-      '*.lan',
-      '*.local',
-      '*.arpa',
-      'time.*.com',
-      'ntp.*.com',
-      '+.market.xiaomi.com',
-      'localhost.ptlogin2.qq.com',
-      '*.msftncsi.com',
-      'www.msftconnecttest.com'
-    ],
-    'default-nameserver': [
-      'system',        // 优先使用系统 DNS
-      '223.6.6.6',     // AliDNS
-      '8.8.8.8',       // Google DNS
-      '2400:3200::1',  // AliDNS IPv6
-      '2001:4860:4860::8888' // Google DNS IPv6
-    ],
-    nameserver: [
-      '8.8.8.8', // 用于 Fake-IP 的上游 DNS
-      'https://doh.pub/dns-query',
-      'https://dns.alidns.com/dns-query'
-    ],
-    'direct-nameserver-follow-policy': false,
-    'fallback-filter': {
-      geoip: true,
-      'geoip-code': 'CN',
-      ipcidr: [
-        '240.0.0.0/4',
-        '0.0.0.0/32'
-      ],
-      domain: [
-        '+.google.com',
-        '+.facebook.com',
-        '+.youtube.com'
-      ]
-    },
-    'proxy-server-nameserver': [
-      'https://doh.pub/dns-query',
-      'https://dns.alidns.com/dns-query',
-      'tls://223.5.5.5'
-    ]
-  };
+    // **=============================== DNS 配置 ===============================**
+    config.dns = {
+        enable: true,
+        ipv6: true,
+        listen: "0.0.0.0:1053",
+        "prefer-h3": false,
+        "respect-rules": true,
+        "cache-algorithm": "arc",
+        "cache-size": 2048,
+        "use-hosts": false,
+        "use-system-hosts": false,
+        "enhanced-mode": "fake-ip",
+        "fake-ip-range": "198.18.0.1/16",
+        "fake-ip-filter-mode": "blacklist",
+        "fake-ip-filter": [
+            "private_domain",
+            "cn_domain",
+            "geosite:connectivity-check",
+            "geosite:private",
+            "fake_ip_filter_DustinWin"
+        ],
+        "default-nameserver": [
+            "1.1.1.1",
+            "8.8.8.8"
+        ],
+        nameserver: [
+            "https://1.1.1.1/dns-query",
+            "https://dns.google/dns-query",
+            "1.1.1.1",
+            "8.8.8.8"
+        ],
+        "nameserver-policy": {
+            "geosite:cn,private": [
+                "https://223.5.5.5/dns-query",
+                "https://doh.pub/dns-query",
+                "223.5.5.5",
+                "119.29.29.29"
+            ],
+            "geo:cn": [
+                "https://223.5.5.5/dns-query",
+                "https://doh.pub/dns-query",
+                "223.5.5.5",
+                "119.29.29.29"
+            ],
+            "geosite:gfw": [
+                "https://1.1.1.1/dns-query",
+                "https://dns.google/dns-query",
+                "1.1.1.1",
+                "8.8.8.8"
+            ],
+            "geosite:geolocation-!cn": [
+                "https://1.1.1.1/dns-query",
+                "https://dns.google/dns-query",
+                "1.1.1.1",
+                "8.8.8.8"
+            ]
+        },
+        fallback: [
+            "1.1.1.1",
+            "8.8.8.8"
+        ],
+        "proxy-server-nameserver": [
+            "https://1.1.1.1/dns-query",
+            "https://dns.google/dns-query",
+            "1.1.1.1",
+            "8.8.8.8"
+        ]
+    };
 
-  // --- 5. 合并配置 ---
-  // 将上面定义的自定义配置覆盖到原始配置中。
-  // 使用 Object.assign 可以更优雅地合并对象
-  Object.assign(config, {
-    'proxy-groups': customProxyGroups,
-    'rule-providers': customRuleProviders,
-    rules: customRules,
-    dns: customDns,
-  });
+    // **控制面板**
+    config["external-controller"] = "127.0.0.1:9090";
+    config.secret = "123465."; // 建议使用更复杂密码
+    config["external-ui"] = "./ui";
+    config["external-ui-url"] = "https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip";
 
-  // 返回修改后的完整配置对象
-  return config;
+    // **=============================== 全局设置 ===============================**
+    config.port = 7890;
+    config["socks-port"] = 7891;
+    config["redir-port"] = 7892;
+    config["mixed-port"] = 7893;
+    config["tproxy-port"] = 7894;
+    config["allow-lan"] = true;
+    config.mode = "rule";
+    config["bind-address"] = "*";
+    config.ipv6 = true;
+    config["unified-delay"] = true;
+    config["tcp-concurrent"] = true;
+    config["log-level"] = "warning";
+    config["find-process-mode"] = "strict";
+    config["global-client-fingerprint"] = "chrome";
+    config["keep-alive-idle"] = 600;
+    config["keep-alive-interval"] = 15;
+    config["disable-keep-alive"] = false;
+
+    config.profile = {
+        "store-selected": true,
+        "store-fake-ip": true,
+        "auto-close-delay": 300
+    };
+
+    // **=============================== 流量嗅探配置 ===============================**
+    config.sniffer = {
+        enable: true,
+        sniff: {
+            HTTP: {
+                ports: [80, "8080-8880"],
+                "override-destination": true
+            },
+            TLS: {
+                ports: [443, 8443]
+            },
+            QUIC: {
+                ports: [443, 8443]
+            }
+        },
+        "force-domain": [
+            "+.v2ex.com"
+        ],
+        "skip-domain": [
+            "+.baidu.com",
+            "+.bilibili.com"
+        ]
+    };
+
+    // **=============================== TUN 配置 ===============================**
+    config.tun = {
+        enable: true,
+        stack: "mixed",
+        "auto-route": true,
+        "auto-redirect": true,
+        "auto-detect-interface": true,
+        "strict-route": true,
+        "dns-hijack": [
+            "any:53",
+            "tcp://any:53"
+        ],
+        mtu: 1500,
+        gso: true,
+        "gso-max-size": 65536,
+        "udp-timeout": 300
+    };
+
+    // **=============================== GEO 数据库配置 ===============================**
+    config["geodata-mode"] = true;
+    config["geodata-loader"] = "memconservative";
+    config["geo-auto-update"] = true;
+    config["geo-update-interval"] = 48;
+    config["geox-url"] = {
+        geoip: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat",
+        geosite: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
+    };
+
+    // **=============================== 代理组设置 ===============================**
+
+    // 主用订阅组引用
+    const allProviders = ["1.p1", "2.p2", "3.p3", "4.p4"];
+
+    config["proxy-groups"] = [
+        // === 从 Clash-Verge-simple.js 移植的核心代理组 ===
+        {
+            name: "✈️ 起飞",
+            type: "select",
+            proxies: ["⚡ 低延迟", "🔧 自建", "👆🏻 指定"],
+            icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Rocket.png"
+        },
+        {
+            name: "⚡ 低延迟",
+            type: "url-test",
+            use: allProviders,
+            url: "https://www.gstatic.com/generate_204",
+            interval: 300,
+            tolerance: 100,
+            timeout: 2000,
+            "include-all": true,
+            "exclude-filter": "EDT|Enzu|天书",
+            icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png"
+        },
+        {
+            name: "👆🏻 指定",
+            type: "select",
+            use: allProviders,
+            filter: "专线|超速|CN2",
+            "include-all": true,
+            "exclude-filter": "Enzu|天书",
+            proxies: [],
+            icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Static.png"
+        },
+        {
+            name: "🔧 自建",
+            type: "select",
+            use: allProviders,
+            filter: "自建",
+            "include-all": true,
+            proxies: [],
+            icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Server.png"
+        },
+
+        // === 功能性策略组 ===
+        {
+            name: "🛩️ 墙内",
+            type: "select",
+            proxies: ["DIRECTLY", "REJECT"],
+            icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/China.png"
+        },
+        {
+            name: "💩 广告",
+            type: "select",
+            proxies: ["REJECT", "DIRECTLY"],
+            icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Advertising.png"
+        },
+        {
+            name: "🤖 AI",
+            type: "select",
+            use: allProviders,
+            filter: "US|拼好鸡|CN2|美国",
+            "include-all": true,
+            "exclude-filter": "Enzu",
+            proxies: [],
+            icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png"
+        },
+        {
+            name: "🌐 未知站点",
+            type: "select",
+            proxies: ["✈️ 起飞", "🛩️ 墙内"],
+            icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png"
+        }
+    ];
+
+    // **=============================== 规则设置 ===============================**
+    config.rules = [
+        // --- 广告拦截 (最高优先级) ---
+        "RULE-SET,AWAvenue_Ads_Rule,💩 广告",
+
+        // --- 自建服务直连 ---
+        "DOMAIN-SUFFIX,040726.xyz,DIRECTLY",
+        "DOMAIN-SUFFIX,nzh-nas.top,DIRECTLY",
+        "DOMAIN-SUFFIX,nzh-nas.me,DIRECTLY",
+        "DOMAIN-SUFFIX,uk.nzh-cloud.me,DIRECTLY",
+
+        // --- 精确的 IP / ASN 规则 (强制 no-resolve，防DNS泄漏) ---
+        "RULE-SET,cn_ip,DIRECTLY,no-resolve",
+        "RULE-SET,geoip_cloudfront,DIRECTLY,no-resolve",
+        "RULE-SET,telegram_ip,✈️ 起飞,no-resolve",
+        "RULE-SET,Telegram_No_Resolve,✈️ 起飞,no-resolve",
+        "RULE-SET,geoip_netflix,✈️ 起飞,no-resolve",
+
+        // --- Telegram 规则 ---
+        "PROCESS-NAME-REGEX,.*telegram.*,✈️ 起飞",
+        "RULE-SET,telegram_domain,✈️ 起飞",
+
+        // --- AI 服务规则 ---
+        "DOMAIN-SUFFIX,lingq.com,🤖 AI",
+        "DOMAIN-SUFFIX,youglish.com,🤖 AI",
+        "DOMAIN-SUFFIX,deepl.com,🤖 AI",
+        "DOMAIN-SUFFIX,chat.openai.com,🤖 AI",
+        "DOMAIN-SUFFIX,grammarly.com,🤖 AI",
+        "DOMAIN-KEYWORD,sci-hub,🤖 AI",
+        "RULE-SET,ai,🤖 AI",
+
+        // --- 学习平台 ---
+        "DOMAIN-SUFFIX,edclub.com,✈️ 起飞",
+        "DOMAIN-SUFFIX,typingclub.com,✈️ 起飞",
+        "DOMAIN-SUFFIX,edclub-cdn.typingclub.com,✈️ 起飞",
+        "DOMAIN-SUFFIX,typingclub-cdn.typingclub.com,✈️ 起飞",
+        "DOMAIN-KEYWORD,typingclub,✈️ 起飞",
+
+        // --- 媒体服务 ---
+        "RULE-SET,youtube_domain,✈️ 起飞",
+        "RULE-SET,tiktok_domain,✈️ 起飞",
+        "RULE-SET,netflix_domain,✈️ 起飞",
+        "RULE-SET,disney_domain,✈️ 起飞",
+
+        // --- 服务类 ---
+        "RULE-SET,onedrive_domain,✈️ 起飞",
+        "RULE-SET,speedtest_domain,✈️ 起飞",
+
+        // --- Apple 直连 ---
+        "DOMAIN-SUFFIX,apple.com,DIRECTLY",
+        "DOMAIN-SUFFIX,icloud.com,DIRECTLY",
+        "DOMAIN-SUFFIX,cdn-apple.com,DIRECTLY",
+        "RULE-SET,apple_cn_domain,DIRECTLY",
+        "DOMAIN-SUFFIX,ls.apple.com,DIRECTLY",
+
+        // --- 精确的直连域名规则 ---
+        "DOMAIN-SUFFIX,julebu.co,DIRECTLY",
+        "RULE-SET,blackmatrix7_direct,DIRECTLY",
+        "RULE-SET,private_domain,DIRECTLY",
+        "RULE-SET,cn_domain,DIRECTLY",
+
+        // --- 通用代理规则 ---
+        "RULE-SET,gfw_domain,✈️ 起飞",
+        "RULE-SET,geolocation-!cn,✈️ 起飞",
+        "RULE-SET,proxy,✈️ 起飞",
+
+        // --- Tracker / BT 下载 ---
+        "RULE-SET,trackerslist,DIRECTLY",
+
+        // --- 最终回退规则 ---
+        "MATCH,🌐 未知站点"
+    ];
+
+    // **=============================== 规则提供者 ===============================**
+
+    // 规则提供者通用配置模板
+    const ruleTemplates = {
+        ip: {
+            type: "http",
+            interval: 86400,
+            behavior: "ipcidr",
+            format: "mrs"
+        },
+        domain: {
+            type: "http",
+            interval: 86400,
+            behavior: "domain",
+            format: "mrs"
+        },
+        yaml: {
+            type: "http",
+            interval: 86400,
+            behavior: "domain",
+            format: "yaml"
+        },
+        classical_yaml: {
+            type: "http",
+            interval: 86400,
+            behavior: "classical",
+            format: "yaml"
+        }
+    };
+
+    config["rule-providers"] = {
+        // 广告过滤
+        AWAvenue_Ads_Rule: {
+            ...ruleTemplates.yaml,
+            path: "./ruleset/AWAvenue_Ads_Rule_Clash.yaml",
+            url: "https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/Filters/AWAvenue-Ads-Rule-Clash.yaml"
+        },
+
+        // fake-ip 过滤
+        fake_ip_filter_DustinWin: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/fake_ip_filter_DustinWin.mrs",
+            url: "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/fakeip-filter.mrs"
+        },
+
+        // 直连类规则
+        blackmatrix7_direct: {
+            ...ruleTemplates.yaml,
+            path: "./ruleset/blackmatrix7_direct.yaml",
+            url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Direct/Direct.yaml"
+        },
+        private_domain: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/private_domain.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs"
+        },
+        cn_domain: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/cn_domain.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs"
+        },
+        cn_ip: {
+            ...ruleTemplates.ip,
+            path: "./ruleset/cn_ip.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/cn.mrs"
+        },
+
+        // BT 下载隐私类
+        trackerslist: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/trackerslist.mrs",
+            url: "https://github.com/DustinWin/ruleset_geodata/raw/refs/heads/mihomo-ruleset/trackerslist.mrs"
+        },
+
+        // 代理类规则
+        proxy: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/proxy.mrs",
+            url: "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/proxy.mrs"
+        },
+        gfw_domain: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/gfw_domain.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/gfw.mrs"
+        },
+        "geolocation-!cn": {
+            ...ruleTemplates.domain,
+            path: "./ruleset/geolocation-!cn.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/geolocation-!cn.mrs"
+        },
+
+        // 学术类
+        ai: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/ai.mrs",
+            url: "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ai.mrs"
+        },
+
+        // cloudflare
+        geoip_cloudflare: {
+            ...ruleTemplates.ip,
+            path: "./ruleset/geoip_cloudflare.mrs",
+            url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geoip/cloudflare.mrs"
+        },
+
+        // 国外媒体
+        youtube_domain: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/youtube_domain.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/youtube.mrs"
+        },
+        tiktok_domain: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/tiktok_domain.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tiktok.mrs"
+        },
+        netflix_domain: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/netflix_domain.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/netflix.mrs"
+        },
+        disney_domain: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/disney_domain.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/disney.mrs"
+        },
+        geoip_netflix: {
+            ...ruleTemplates.ip,
+            path: "./ruleset/geoip_netflix.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/netflix.mrs"
+        },
+
+        // Telegram
+        telegram_domain: {
+            ...ruleTemplates.yaml,
+            path: "./ruleset/telegram_domain.yaml",
+            url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Telegram/Telegram.yaml"
+        },
+        telegram_ip: {
+            ...ruleTemplates.ip,
+            path: "./ruleset/telegram_ip.mrs",
+            url: "https://github.com/DustinWin/ruleset_geodata/raw/refs/heads/mihomo-ruleset/telegramip.mrs"
+        },
+        Telegram_No_Resolve: {
+            ...ruleTemplates.classical_yaml,
+            path: "./ruleset/Telegram_No_Resolve.yaml",
+            url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Telegram/Telegram_No_Resolve.yaml"
+        },
+
+        // Apple
+        apple_cn_domain: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/apple_cn_domain.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple-cn.mrs"
+        },
+
+        // 微软
+        onedrive_domain: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/onedrive_domain.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/onedrive.mrs"
+        },
+        speedtest_domain: {
+            ...ruleTemplates.domain,
+            path: "./ruleset/speedtest_domain.mrs",
+            url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/ookla-speedtest.mrs"
+        }
+    };
+
+    return config;
 }
