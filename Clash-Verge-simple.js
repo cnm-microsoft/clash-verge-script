@@ -10,7 +10,6 @@ function main(config) {
     {
       name: '✈️ ‍起飞',
       type: 'select',
-      // 在最前面加入链式代理选项，方便切换
       proxies: ['⚡ ‍低延迟', '🔧 ‍自建', '👆🏻 指定'],
     },
     {
@@ -20,8 +19,8 @@ function main(config) {
       interval: 300,
       tolerance: 100,
       timeout: 2000,
-      'include-all': true, // 包括订阅中的所有节点
-      'exclude-filter': 'EDT|Enzu|天书' // 排除名称中包含 "Enzu" 的节点
+      'include-all': true,
+      'exclude-filter': '台湾'
     },
     {
       name: '👆🏻 指定',
@@ -52,7 +51,7 @@ function main(config) {
     {
       name: '🤖 ‍AI',
       type: 'select', 
-      filter: 'US|自建|CN2|美国',
+      filter: 'US|自建|CN2|美国|台湾',
       'include-all': true,
       'exclude-filter': 'Enzu', // 排除名称中包含 "Enzu" 的节点
       proxies: [],
@@ -130,14 +129,6 @@ function main(config) {
       behavior: 'classical',
       url: 'https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Providers/Ruleset/Google.yaml',
       path: './ruleset/Google.yaml',
-      interval: 86400,
-    },
-    // telegram 服务规则
-    Telegram: {
-      type: 'http',
-      behavior: 'classical',
-      url: 'https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Providers/Ruleset/Telegram.yaml',
-      path: './ruleset/Telegram.yaml',
       interval: 86400,
     },
     // 常见需要直连的应用程序
