@@ -1,0 +1,606 @@
+{
+    "dns": {
+        "independent_cache": true,
+        "rules": [
+            {
+                "action": "predefined",
+                "rule_set": [
+                    "AdGuardSDNSFilter",
+                    "chrome-doh"
+                ]
+            },
+            {
+                "action": "predefined",
+                "query_type": "HTTPS"
+            },
+            {
+                "query_type": [
+                    "A",
+                    "AAAA"
+                ],
+                "rewrite_ttl": 1,
+                "server": "fakeip"
+            },
+            {
+                "clash_mode": "global",
+                "server": "remote"
+            },
+            {
+                "clash_mode": "direct",
+                "server": "local"
+            },
+            {
+                "rule_set": "geosite-cn",
+                "server": "local"
+            },
+            {
+                "rule_set": "ext-cn-domain",
+                "server": "local"
+            }
+        ],
+        "servers": [
+            {
+                "detour": "select",
+                "server": "8.8.8.8",
+                "tag": "remote",
+                "type": "https"
+            },
+            {
+                "server": "223.5.5.5",
+                "tag": "local",
+                "type": "https"
+            },
+            {
+                "inet4_range": "198.18.0.0/15",
+                "inet6_range": "fc00::/18",
+                "tag": "fakeip",
+                "type": "fakeip"
+            }
+        ],
+        "strategy": "prefer_ipv4"
+    },
+    "experimental": {
+        "cache_file": {
+            "enabled": true
+        },
+        "clash_api": {
+            "external_controller": "127.0.0.1:9090",
+            "secret": ""
+        }
+    },
+    "inbounds": [
+        {
+            "address": [
+                "172.19.0.1/30",
+                "fdfe:dcba:9876::1/126"
+            ],
+            "auto_route": true,
+            "endpoint_independent_nat": true,
+            "mtu": 9000,
+            "strict_route": true,
+            "type": "tun"
+        },
+        {
+            "listen": "127.0.0.1",
+            "listen_port": 2333,
+            "tag": "socks-in",
+            "type": "socks",
+            "users": []
+        },
+        {
+            "listen": "127.0.0.1",
+            "listen_port": 2334,
+            "tag": "mixed-in",
+            "type": "mixed",
+            "users": []
+        }
+    ],
+    "log": {},
+    "outbounds": [
+        {
+            "tag": "select",
+            "type": "selector",
+            "default": "urltest",
+            "outbounds": [
+                "urltest",
+                "us-free",
+                "东京【2x】",
+                "美西CN2【2x】",
+                "阿里云-HK-x",
+                "reality-阿里云-HK",
+                "香港 01",
+                "香港 02",
+                "美国 01",
+                "美国 02",
+                "美国 03",
+                "韩国 01",
+                "韩国 02",
+                "台湾 01",
+                "台湾 02",
+                "日本 01",
+                "日本 02",
+                "日本 03",
+                "日本 04",
+                "日本 05",
+                "日本 06",
+                "新加坡 01",
+                "新加坡 02",
+                "新加坡 03",
+                "新加坡 04"
+            ]
+        },
+        {
+            "tag": "urltest",
+            "type": "urltest",
+            "outbounds": [
+                "us-free",
+                "东京【2x】",
+                "美西CN2【2x】",
+                "阿里云-HK-x",
+                "reality-阿里云-HK",
+                "香港 01",
+                "香港 02",
+                "美国 01",
+                "美国 02",
+                "美国 03",
+                "韩国 01",
+                "韩国 02",
+                "台湾 01",
+                "台湾 02",
+                "日本 01",
+                "日本 02",
+                "日本 03",
+                "日本 04",
+                "日本 05",
+                "日本 06",
+                "新加坡 01",
+                "新加坡 02",
+                "新加坡 03",
+                "新加坡 04"
+            ]
+        },
+        {
+            "server": "free.040726.xyz",
+            "server_port": 20034,
+            "tag": "us-free",
+            "tls": {
+                "enabled": true,
+                "server_name": "xp.apple.com",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                },
+                "reality": {
+                    "enabled": true,
+                    "public_key": "MEl3sGjUA7GQLn_TzrtEdi4VE4I10pWU1H13zgFjZgE",
+                    "short_id": "ff5717"
+                }
+            },
+            "type": "vless",
+            "uuid": "98bfe59c-b258-4da3-94bb-31ba59a4d71b",
+            "packet_encoding": "xudp"
+        },
+        {
+            "server": "47.79.93.175",
+            "server_port": 25001,
+            "tag": "东京【2x】",
+            "tls": {
+                "enabled": true,
+                "server_name": "as.idolmaster-official.jp",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "ios"
+                },
+                "reality": {
+                    "enabled": true,
+                    "public_key": "AUZQzeKYFfP-TCl3GXY4Ck9WptMGagYuOPY2GlSWpEA",
+                    "short_id": "35e4bcd8"
+                }
+            },
+            "type": "vless",
+            "uuid": "0e8d9803-67df-4b27-acd5-75c426118966",
+            "flow": "xtls-rprx-vision",
+            "packet_encoding": "xudp"
+        },
+        {
+            "server": "45.62.124.156",
+            "server_port": 25001,
+            "tag": "美西CN2【2x】",
+            "tls": {
+                "enabled": true,
+                "server_name": "www.mcdaniel.edu",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "safari"
+                },
+                "reality": {
+                    "enabled": true,
+                    "public_key": "aiG3fWOcXSL9fLajIgfyDAYwLQLKT8xGyR6JbvbSlwA",
+                    "short_id": "8eff7f65"
+                }
+            },
+            "type": "vless",
+            "uuid": "0e8d9803-67df-4b27-acd5-75c426118966",
+            "flow": "xtls-rprx-vision",
+            "packet_encoding": "xudp"
+        },
+        {
+            "server": "47.76.112.234",
+            "server_port": 48163,
+            "tag": "阿里云-HK-x",
+            "tls": {
+                "enabled": true,
+                "server_name": "xp.apple.com:443",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                },
+                "reality": {
+                    "enabled": true,
+                    "public_key": "vBoUaSxfQ_30gLWSgaLAtrH0Rj6A41b7skhHRsGZiw4",
+                    "short_id": "9808"
+                }
+            },
+            "type": "vless",
+            "uuid": "1cbf0096-6428-48fc-9fa0-70407af5f229",
+            "packet_encoding": "xudp"
+        },
+        {
+            "server": "47.76.112.234",
+            "server_port": 18047,
+            "tag": "reality-阿里云-HK",
+            "tls": {
+                "enabled": true,
+                "server_name": "xp.apple.com",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                },
+                "reality": {
+                    "enabled": true,
+                    "public_key": "efbm3eL6_VJ1es2bl0CpmLk6GmmNYHbyOhDXsWs0giA",
+                    "short_id": "7fcb2088"
+                }
+            },
+            "type": "vless",
+            "uuid": "27551c5b-2b82-44c3-9d81-028fbfac7c98",
+            "packet_encoding": "xudp"
+        },
+        {
+            "server": "hk1.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 34180,
+            "tag": "香港 01",
+            "type": "vmess",
+            "security": "auto",
+            "uuid": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "hk2.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 28069,
+            "tag": "香港 02",
+            "tls": {
+                "enabled": true,
+                "server_name": "apple.com",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                }
+            },
+            "type": "trojan",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "fuck5.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 59019,
+            "tag": "美国 01",
+            "type": "shadowsocks",
+            "method": "chacha20-ietf-poly1305",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "fuck6.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 48057,
+            "tag": "美国 02",
+            "tls": {
+                "enabled": true,
+                "server_name": "apple.com",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                }
+            },
+            "type": "trojan",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "fuck7.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 37829,
+            "tag": "美国 03",
+            "type": "shadowsocks",
+            "method": "chacha20-ietf-poly1305",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "kr1.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 51256,
+            "tag": "韩国 01",
+            "tls": {
+                "enabled": true,
+                "server_name": "apple.com",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                }
+            },
+            "type": "trojan",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "kr2.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 64123,
+            "tag": "韩国 02",
+            "tls": {
+                "enabled": true,
+                "server_name": "apple.com",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                }
+            },
+            "type": "trojan",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "hinet.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 11189,
+            "tag": "台湾 01",
+            "tls": {
+                "enabled": true,
+                "server_name": "apple.com",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                }
+            },
+            "type": "trojan",
+            "tcp_fast_open": true
+        },
+        {
+            "server": "hinet.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 56568,
+            "tag": "台湾 02",
+            "type": "vmess",
+            "security": "auto",
+            "uuid": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "jp1.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 52422,
+            "tag": "日本 01",
+            "type": "shadowsocks",
+            "method": "chacha20-ietf-poly1305",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "jp2.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 45127,
+            "tag": "日本 02",
+            "tls": {
+                "enabled": true,
+                "server_name": "apple.com",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                }
+            },
+            "type": "trojan",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "jp4.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 54234,
+            "tag": "日本 03",
+            "tls": {
+                "enabled": true,
+                "server_name": "apple.com",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                }
+            },
+            "type": "trojan",
+            "tcp_fast_open": true
+        },
+        {
+            "server": "jp5.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 45123,
+            "tag": "日本 04",
+            "tls": {
+                "enabled": true,
+                "server_name": "apple.com",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                }
+            },
+            "transport": {
+                "headers": {
+                    "Host": [
+                        "QWQ"
+                    ]
+                },
+                "path": "/",
+                "type": "ws"
+            },
+            "type": "vmess",
+            "security": "auto",
+            "uuid": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "tcp_fast_open": true
+        },
+        {
+            "server": "jp6.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 23234,
+            "tag": "日本 05",
+            "type": "vmess",
+            "security": "auto",
+            "uuid": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "jp7.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 53638,
+            "tag": "日本 06",
+            "tls": {
+                "enabled": true,
+                "server_name": "apple.com",
+                "insecure": true,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                }
+            },
+            "type": "trojan",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "sg1.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 56138,
+            "tag": "新加坡 01",
+            "type": "shadowsocks",
+            "method": "chacha20-ietf-poly1305",
+            "tcp_fast_open": true
+        },
+        {
+            "password": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "server": "sg3.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 64578,
+            "tag": "新加坡 02",
+            "type": "shadowsocks",
+            "method": "chacha20-ietf-poly1305",
+            "tcp_fast_open": true
+        },
+        {
+            "server": "sg5.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 54126,
+            "tag": "新加坡 03",
+            "type": "vmess",
+            "security": "auto",
+            "uuid": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "tcp_fast_open": true
+        },
+        {
+            "server": "sg6.cf0d222b-16d3-4b47-bde9-0ec971c6a485.lat",
+            "server_port": 15638,
+            "tag": "新加坡 04",
+            "transport": {
+                "headers": {
+                    "Host": [
+                        "tms.dingtalk.com"
+                    ]
+                },
+                "path": "/",
+                "type": "ws"
+            },
+            "type": "vmess",
+            "security": "auto",
+            "uuid": "a898c353-9f2f-4818-b534-6567adf22a3e",
+            "tcp_fast_open": true
+        },
+        {
+            "tag": "direct",
+            "type": "direct"
+        }
+    ],
+    "route": {
+        "auto_detect_interface": true,
+        "default_domain_resolver": {
+            "server": "local"
+        },
+        "rule_set": [
+            {
+                "format": "binary",
+                "tag": "geoip-cn",
+                "type": "remote",
+                "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs"
+            },
+            {
+                "format": "binary",
+                "tag": "geosite-cn",
+                "type": "remote",
+                "url": "https://raw.githubusercontent.com/xmdhs/sing-geosite/rule-set-Loyalsoldier/geosite-geolocation-cn.srs"
+            },
+            {
+                "format": "binary",
+                "tag": "AdGuardSDNSFilter",
+                "type": "remote",
+                "url": "https://raw.githubusercontent.com/xmdhs/sing-box-ruleset/rule-set/AdGuardSDNSFilterSingBox.srs"
+            },
+            {
+                "format": "source",
+                "tag": "chrome-doh",
+                "type": "remote",
+                "url": "https://gist.githubusercontent.com/xmdhs/71fc5ff6ef29f5ecaf2c52b8de5c3172/raw/chrome-doh.json"
+            },
+            {
+                "format": "binary",
+                "tag": "ext-cn-domain",
+                "type": "remote",
+                "url": "https://raw.githubusercontent.com/xmdhs/cn-domain-list/rule-set/ext-cn-list.srs"
+            }
+        ],
+        "rules": [
+            {
+                "action": "sniff"
+            },
+            {
+                "action": "hijack-dns",
+                "protocol": "dns"
+            },
+            {
+                "action": "resolve",
+                "strategy": "prefer_ipv4"
+            },
+            {
+                "clash_mode": "direct",
+                "outbound": "direct"
+            },
+            {
+                "clash_mode": "global",
+                "outbound": "select"
+            },
+            {
+                "ip_is_private": true,
+                "outbound": "direct"
+            },
+            {
+                "outbound": "direct",
+                "rule_set": "geoip-cn"
+            }
+        ]
+    }
+}

@@ -139,6 +139,22 @@ function main(config) {
       path: './ruleset/applications.yaml',
       interval: 86400,
     },
+    // 额外中文域名列表
+    'ext-cn-list': {
+      type: 'http',
+      behavior: 'domain',
+      url: 'https://raw.githubusercontent.com/xmdhs/cn-domain-list/rule-set/ext-cn-list.yaml',
+      path: './ruleset/ext-cn-list.yaml',
+      interval: 86400,
+    },
+    // Telegram IP 段
+    Telegram: {
+      type: 'http',
+      behavior: 'ipcidr',
+      url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/telegramcidr.txt',
+      path: './ruleset/telegramcidr.yaml',
+      interval: 86400,
+    },
   };
 
   // --- 3. 自定义路由规则 (Rules) ---
@@ -155,17 +171,19 @@ function main(config) {
     // 广告拦截
     'RULE-SET,reject,💩 ‍广告,no-resolve',
     'RULE-SET,AD,💩 ‍广告,no-resolve',
+    'RULE-SET,applications,DIRECT,no-resolve',
     // 国内/直连服务
     'RULE-SET,LoyalDirect,DIRECT,no-resolve',
     'RULE-SET,LoyalLanCIDR,DIRECT,no-resolve',
     'RULE-SET,LoyalCnCIDR,DIRECT,no-resolve',
+    'RULE-SET,ext-cn-list,DIRECT,no-resolve',
     'GEOIP,CN,DIRECT,no-resolve',
-    'RULE-SET,applications,DIRECT,no-resolve',
     // 自用代理规则
     'DOMAIN-SUFFIX,api.iturrit.com,✈️ ‍起飞',
     'DOMAIN-SUFFIX,www.lxc.wiki,✈️ ‍起飞',
     // 代理规则
     'RULE-SET,ProxyGFWlist,✈️ ‍起飞,no-resolve',
+    'RULE-SET,Google,✈️ ‍起飞,no-resolve',
     'RULE-SET,Telegram,✈️ ‍起飞,no-resolve',
     'RULE-SET,AI,🤖 ‍AI,no-resolve',
     // 最终匹配规则：所有未匹配到的流量都走这个规则
@@ -176,57 +194,28 @@ function main(config) {
   // 这是脚本的核心部分之一，用于防止 DNS 污染和实现更快的解析。
   const customDns = {
     enable: true,
-    listen: '0.0.0.0:53',
+    ipv6: true,      // 如网络环境不支持IPv6请设为false
     'enhanced-mode': 'fake-ip',
     'fake-ip-range': '198.18.0.1/16',
-    'fake-ip-filter-mode': 'blacklist',
-    'prefer-h3': false,
-    'respect-rules': false,
-    'use-hosts': false,
-    'use-system-hosts': false,
-    ipv6: true,
-    'fake-ip-filter': [
-      '*.lan',
-      '*.local',
-      '*.arpa',
-      'time.*.com',
-      'ntp.*.com',
-      '+.market.xiaomi.com',
-      'localhost.ptlogin2.qq.com',
-      '*.msftncsi.com',
-      'www.msftconnecttest.com'
+    'fake-ip-filter': [     // 使用geosite域名集合以精简配置，也可使用规则集（ruleset）
+      'geosite:private',
+      'geosite:category-ntp'
     ],
-    'default-nameserver': [
-      'system',        // 优先使用系统 DNS
-      '223.6.6.6',     // AliDNS
-      '8.8.8.8',       // Google DNS
-      '2400:3200::1',  // AliDNS IPv6
-      '2001:4860:4860::8888' // Google DNS IPv6
-    ],
+    'use-hosts': false,     // 如有特殊需求请设为true
+    'use-system-hosts': false,     // 如有特殊需求请设为true
     nameserver: [
-      '8.8.8.8', // 用于 Fake-IP 的上游 DNS
-      'https://doh.pub/dns-query',
-      'https://dns.alidns.com/dns-query'
+      'https://1.1.1.1/dns-query',
+      'https://8.8.8.8/dns-query'
     ],
-    'direct-nameserver-follow-policy': false,
-    'fallback-filter': {
-      geoip: true,
-      'geoip-code': 'CN',
-      ipcidr: [
-        '240.0.0.0/4',
-        '0.0.0.0/32'
-      ],
-      domain: [
-        '+.google.com',
-        '+.facebook.com',
-        '+.youtube.com'
-      ]
-    },
     'proxy-server-nameserver': [
-      'https://doh.pub/dns-query',
-      'https://dns.alidns.com/dns-query',
-      'tls://223.5.5.5'
-    ]
+      'https://223.5.5.5/dns-query',
+      'https://223.6.6.6/dns-query'
+    ],
+    'direct-nameserver': [
+      'https://223.5.5.5/dns-query',
+      'https://223.6.6.6/dns-query'
+    ],
+    'respect-rules': true
   };
 
   // --- 5. 合并配置 ---

@@ -1,0 +1,282 @@
+{
+  "log": {
+    "level": "info"
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "local",
+        "type": "udp",
+        "server": "223.5.5.5"
+      },
+      {
+        "tag": "google",
+        "type": "https",
+        "server": "8.8.8.8"
+      },
+      {
+        "tag": "alidns",
+        "type": "https",
+        "server": "dns.alidns.com",
+        "domain_resolver": "local"
+      },
+      {
+        "tag": "doh-pub",
+        "type": "https",
+        "server": "doh.pub",
+        "domain_resolver": "local"
+      }
+    ],
+    "rules": [
+      {
+        "rule_set": [
+          "LoyalDirect",
+          "LoyalLanCIDR"
+        ],
+        "server": "alidns"
+      },
+      {
+        "rule_set": [
+          "ProxyGFWlist"
+        ],
+        "server": "google"
+      }
+    ],
+    "final": "google",
+    "strategy": "ipv4_only",
+    "disable_cache": false,
+    "disable_expire": false,
+    "independent_cache": true,
+    "client_subnet": "0.0.0.0/0"
+  },
+  "inbounds": [
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "0.0.0.0",
+      "listen_port": 7890
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "DIRECT"
+    },
+    {
+      "type": "block",
+      "tag": "REJECT"
+    },
+    {
+      "type": "selector",
+      "tag": "✈️ ‍起飞",
+      "outbounds": [
+        "⚡ ‍低延迟",
+        "🔧 ‍自建",
+        "👆🏻 指定",
+        "DIRECT"
+      ]
+    },
+    {
+      "type": "urltest",
+      "tag": "⚡ ‍低延迟",
+      "outbounds": [
+        "🔧 ‍自建",
+        "👆🏻 指定"
+      ],
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": "5m",
+      "tolerance": 100,
+      "idle_timeout": "30m"
+    },
+    {
+      "type": "selector",
+      "tag": "👆🏻 指定",
+      "outbounds": [
+        "DIRECT"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "🔧 ‍自建",
+      "outbounds": [
+        "DIRECT"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "🛩️ ‍墙内",
+      "outbounds": [
+        "DIRECT",
+        "REJECT"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "💩 ‍广告",
+      "outbounds": [
+        "REJECT",
+        "DIRECT"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "🤖 ‍AI",
+      "outbounds": [
+        "DIRECT"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "🌐 ‍未知站点",
+      "outbounds": [
+        "✈️ ‍起飞",
+        "🛩️ ‍墙内"
+      ]
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "inbound": "mixed-in",
+        "action": "sniff"
+      },
+      {
+        "domain_suffix": [
+          "040726.xyz",
+          "nzh-nas.top",
+          "nzh-nas.me",
+          "uk.nzh-cloud.me",
+          "api.qnaigc.com",
+          "bing.com"
+        ],
+        "outbound": "DIRECT"
+      },
+      {
+        "rule_set": [
+          "reject",
+          "AD"
+        ],
+        "outbound": "💩 ‍广告"
+      },
+      {
+        "rule_set": [
+          "LoyalDirect",
+          "LoyalLanCIDR",
+          "LoyalCnCIDR",
+          "applications"
+        ],
+        "outbound": "DIRECT"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "DIRECT"
+      },
+      {
+        "rule_set": [
+          "LoyalCnCIDR"
+        ],
+        "outbound": "DIRECT"
+      },
+      {
+        "domain_suffix": [
+          "api.iturrit.com",
+          "www.lxc.wiki"
+        ],
+        "outbound": "✈️ ‍起飞"
+      },
+      {
+        "rule_set": [
+          "ProxyGFWlist"
+        ],
+        "outbound": "✈️ ‍起飞"
+      },
+      {
+        "rule_set": [
+          "AI"
+        ],
+        "outbound": "🤖 ‍AI"
+      }
+    ],
+    "final": "🌐 ‍未知站点",
+    "auto_detect_interface": true,
+    "rule_set": [
+      {
+        "tag": "reject",
+        "type": "remote",
+        "format": "source",
+        "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt",
+        "download_detour": "DIRECT",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "AD",
+        "type": "remote",
+        "format": "source",
+        "url": "https://script.cx.ms/awavenue/AWAvenue-Ads-Rule-Clash.yaml",
+        "download_detour": "DIRECT",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "LoyalDirect",
+        "type": "remote",
+        "format": "source",
+        "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt",
+        "download_detour": "DIRECT",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "LoyalLanCIDR",
+        "type": "remote",
+        "format": "source",
+        "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt",
+        "download_detour": "DIRECT",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "LoyalCnCIDR",
+        "type": "remote",
+        "format": "source",
+        "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt",
+        "download_detour": "DIRECT",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "applications",
+        "type": "remote",
+        "format": "source",
+        "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt",
+        "download_detour": "DIRECT",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "ProxyGFWlist",
+        "type": "remote",
+        "format": "source",
+        "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/gfw.txt",
+        "download_detour": "DIRECT",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "AI",
+        "type": "remote",
+        "format": "source",
+        "url": "https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Providers/Ruleset/Gemini.yaml",
+        "download_detour": "DIRECT",
+        "update_interval": "1d"
+      }
+    ]
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "path": "cache.db",
+      "store_fakeip": true
+    },
+    "clash_api": {
+      "external_controller": "0.0.0.0:9090",
+      "external_ui": "ui",
+      "secret": "",
+      "default_mode": "rule"
+    }
+  }
+}
